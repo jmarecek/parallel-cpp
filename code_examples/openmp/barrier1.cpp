@@ -13,3 +13,4 @@ int main() {
 #pragma omp parallel shared(5)
     work();
 }
+

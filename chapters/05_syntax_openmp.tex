@@ -1,2 +1,149 @@
 \chapter{The Syntax in OpenMP}
 
+OpenMP is a specification for concurrency in Fortran, C, and C++. Prime implementations include IOMP for ICC/Clang and GOMP for GCC.
+
+Traditional implementations of OpenMP have been rather closely built on top of Pthreads, 
+which results in the lack of fine-grained scheduling, 
+memory management, network management, signaling, etc.
+The lack of fine-grained scheduling notably means the lack of user-level threads (co-routines)
+and the lack of queries as to the number of hardware threads utilized by other processes, 
+which often results in high overhead when the number of threads (across all processes!) increases above the number of hardware threads supported.
+
+Since OpenMP 5.0, the distinction between threads and tasks has been erased and thread teams are also cast into tasks. There are now also OpenMP implementations over lightweight threads, notably (BOLT is OpenMP over Lightweight Threads, https://www.bolt-omp.org/). 
+
+\section{Threads, Tasks, Coroutines}
+
+\subsection{OpenMP Threads}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP parallel regions.
+\tcblower
+\cppfile{code_examples/openmp/parallel1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP parallel regions.
+\tcblower
+\cppfile{code_examples/openmp/parallel2.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP parallel regions.
+\tcblower
+\cppfile{code_examples/openmp/parallel3.cpp}
+\end{codebox}
+
+\subsection{Sections}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP sections.
+\tcblower
+\cppfile{code_examples/openmp/section1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP sections.
+\tcblower
+\cppfile{code_examples/openmp/section2.cpp}
+\end{codebox}
+
+\subsection{Coroutines / Tasks}
+
+The closest to a coroutine in OpenMP is the concept of a task. While it does not come with a promise of an implementation with a user-level thread library (cf. Argobots, Converse threads,	Qthreads,	MassiveThreads, Nanos++, Maestro, GnuPth, StackThreads/MP, Protothreads, Capriccio, StateThreads, TiNy-threads, etc), it often is implemented thus.  
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP tasks.
+\tcblower
+\cppfile{code_examples/openmp/task1.cpp}
+\end{codebox}
+
+\section{Synchronisation Primitives}
+
+\subsection{Barrier}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/openmp/barrier1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/openmp/barrier2.cpp}
+\end{codebox}
+
+\subsection{Atomic Variables}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of atomic variables.
+\tcblower
+\cppfile{code_examples/openmp/atomic1.cpp}
+\end{codebox}
+
+\subsection{Reductions}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of reductions.
+\tcblower
+\cppfile{code_examples/openmp/reduction.cpp}
+\end{codebox}
+
+\subsection{Mutexes}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP mutexes.
+\tcblower
+\cppfile{code_examples/openmp/mutex1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP mutexes.
+\tcblower
+\cppfile{code_examples/openmp/mutex2.cpp}
+\end{codebox}
+
+\subsection{Critical Sections}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a critical section.
+\tcblower
+\cppfile{code_examples/openmp/critical1.cpp}
+\end{codebox}
+
+
+\section{Algorithms in the Standard Template Library}
+
+\subsection{For Each}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of for each.
+\tcblower
+\cppfile{code_examples/openmp/for_each1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of for each.
+\tcblower
+\cppfile{code_examples/openmp/for_each2.cpp}
+\end{codebox}
+
+\subsection{Reduce}
+
+\subsection{Merge}
+

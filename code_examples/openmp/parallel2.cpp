@@ -1,27 +1,23 @@
+#include <iostream>
+#include <syncstream>
 #include <omp.h>
 
-void subdomain(float *x, int istart, int ipoints) {
-    int i;
-    for (i = 0; i < ipoints; i++) x[istart+i] = 123;
-}
+int main() {
 
-void sub(float *x, int npoints) {
-    int iam, nt, ipoints, istart;
+   omp_set_nested(1);
 
-#pragma omp parallel default(shared) private(iam,nt,ipoints,istart)
-    {
+#pragma omp parallel num_threads(2) private(iam,nt)
+{
+        int iam = omp_get_thread_num();
+        int nt =  omp_get_num_threads();
+	std::osyncstream(std::cout) << "L1: " << iam << "/" << nt << std::endl;
+
+#pragma omp parallel num_threads(2) private(iam,nt)
+{
         iam = omp_get_thread_num();
         nt =  omp_get_num_threads();
-        ipoints = npoints / nt;    /* size of partition */
-        istart = iam * ipoints;  /* starting array index */
-        if (iam == nt-1)     /* last thread may do more */
-            ipoints = npoints - istart;
-        subdomain(x, istart, ipoints);
-    }
+        std::osyncstream(std::cout) << "L2 " << iam << "/" << nt << std::endl;
 }
-
-int main() {
-    float array[10000];
-    sub(array, 10000);
-    return 0;
+}
+	return 0;
 }
