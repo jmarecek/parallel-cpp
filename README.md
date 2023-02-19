@@ -21,3 +21,7 @@ The resulting PDF will be in the build folder.
 Most code files have wrapping main files that exercise both the build and also contain `assert` expressions that verify correctness of the code.
 
 The `verify.sh` shell script will build all (except for a few that don't compile with GCC 11) examples, and then run each of them to validate all asserts.
+
+### Lecture notes
+
+To build the PDF of the lecture notes, issue `pdflatex --shell-escape book`. 
