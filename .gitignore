@@ -322,3 +322,4 @@ TSWLatexianTemp*
 *-tags.tex
 
 ./build
+./code_examples/cmake-build-debug/
