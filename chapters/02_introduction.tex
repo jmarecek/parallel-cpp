@@ -1,0 +1,22 @@
+\chapter{Introduction}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/73r9n1WYM}{\ExternalLink}}
+\footnotesize Example of \cpp{std::for_each}\index{\cpp{std::for_each}} algorithm with a custom function object, calculating the number of elements and their sum.
+\tcblower
+\cppfile{code_examples/introduction/history_cc98_code.h}
+\end{codebox}
+
+\begin{codebox}[]{\href{https://godbolt.org/z/zv4fWbT3z}{\ExternalLink}}
+\footnotesize Example of \cpp{std::for_each}\index{\cpp{std::for_each}} algorithm with a capturing lambda, calculating the number of elements and their sum.
+\tcblower
+\cppfile{code_examples/introduction/history_cc11_code.h}
+\end{codebox}
+
+The \CC17 standard introduced parallel algorithms that provide an easy way to speed up processing with minimal effort. All you need to do is to specify the desired execution model, and the library will take care of parallelizing the execution.
+
+\begin{codebox}[]{\href{https://godbolt.org/z/1nK5944K7}{\ExternalLink}}
+\footnotesize Example of \cpp{std::for_each}\index{\cpp{std::for_each}} algorithm using unsequenced parallel execution model. Note that counters are now shared state and need to be \cpp{std::atomic}\index{\cpp{std::atomic}} or protected by a \cpp{std::mutex}\index{\cpp{std::mutex}}.
+\tcblower
+\cppfile{code_examples/introduction/history_cc17_code.h}
+\end{codebox}

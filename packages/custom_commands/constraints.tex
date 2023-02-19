@@ -1,0 +1,28 @@
+% Command to consistently format the algorithm info table.
+\newcommand{\constraints}[4]{
+\begin{center}
+\footnotesize
+\begin{tabular}{|m{\dimexpr.22\textwidth-2\tabcolsep}|m{\dimexpr.30\textwidth-2\tabcolsep}|m{\dimexpr.45\textwidth-2\tabcolsep}|}
+\hline
+\rowcolor{black!80} \multicolumn{3}{l}{\textcolor{white}{constraints}} \\
+
+\hline
+domain & \multicolumn{2}{m{\dimexpr.75\textwidth-2\tabcolsep}|}{#1} \\
+
+
+\ifx\hfuzz#2\hfuzz\else
+\hline
+parallel domain & \multicolumn{2}{m{\dimexpr.75\textwidth-2\tabcolsep}|}{#2} \\
+\fi
+
+\ifx\hfuzz#3#4\hfuzz\else
+\hline
+\multirow{2}{.15\textwidth}{invocable} & \cellcolor{black!80} \textcolor{white}{default} & \cellcolor{black!80} \textcolor{white}{custom} \\
+\cline{2-3}
+& #3 & #4 \\
+\fi
+
+\hline
+\end{tabular}
+\end{center}
+}
