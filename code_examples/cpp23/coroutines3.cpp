@@ -1,16 +1,16 @@
+// https://en.cppreference.com/w/cpp/language/coroutines
+
 #include <coroutine>
 #include <iostream>
 #include <syncstream>
  
 struct promise;
  
-struct coroutine : std::coroutine_handle<promise>
-{
+struct coroutine : std::coroutine_handle<promise> {
     using promise_type = struct promise;
 };
  
-struct promise
-{
+struct promise {
     coroutine get_return_object() { return {coroutine::from_promise(*this)}; }
     std::suspend_always initial_suspend() noexcept { return {}; }
     std::suspend_always final_suspend() noexcept { return {}; }
@@ -18,10 +18,8 @@ struct promise
     void unhandled_exception() {}
 };
  
-void good()
-{
-    coroutine h = [](int i) -> coroutine // make i a coroutine parameter
-    {
+int main() {
+    coroutine h = [](int i) -> coroutine {
         std::osyncstream(std::cout) << i;
         co_return;
     }(0);

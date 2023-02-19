@@ -1,4 +1,188 @@
 \chapter{The Syntax in C++23}
 
+\section{Threads, Tasks, Coroutines}
 
+\subsection{C++11 Threads}
 
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a C++11 thread.
+\tcblower
+\cppfile{code_examples/cpp23/thread1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a C++11 thread.
+\tcblower
+\cppfile{code_examples/cpp23/thread2.cpp}
+\end{codebox}
+
+\subsection{C++20 Threads}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of jthread.
+\tcblower
+\cppfile{code_examples/cpp23/jthread1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of jthread.
+\tcblower
+\cppfile{code_examples/cpp23/jthread2.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of jthread.
+\tcblower
+\cppfile{code_examples/cpp23/jthread3.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of jthread.
+\tcblower
+\cppfile{code_examples/cpp23/jthread4.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of jthread.
+\tcblower
+\cppfile{code_examples/cpp23/jthread5.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of jthread.
+\tcblower
+\cppfile{code_examples/cpp23/jthread6.cpp}
+\end{codebox}
+
+\subsection{Tasks}
+
+\subsection{Coroutines}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of coroutines.
+\tcblower
+\cppfile{code_examples/cpp23/coroutines1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of coroutines.
+\tcblower
+\cppfile{code_examples/cpp23/coroutines2.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of coroutines.
+\tcblower
+\cppfile{code_examples/cpp23/coroutines3.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of coroutines.
+\tcblower
+\cppfile{code_examples/cpp23/coroutines4.cpp}
+\end{codebox}
+
+\section{Synchronisation Primitives}
+
+\subsection{Barrier}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/cpp23/barrier1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/cpp23/barrier2.cpp}
+\end{codebox}
+
+\subsection{Atomic Variables}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of atomic variables.
+\tcblower
+\cppfile{code_examples/cpp23/atomic1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of atomic variables.
+\tcblower
+\cppfile{code_examples/cpp23/atomic2.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An elaborate example of the use of atomic variables.
+\tcblower
+\cppfile{code_examples/cpp23/atomic3.h}
+\end{codebox}
+
+\subsection{Mutexes}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/cpp23/mutex1.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/cpp23/mutex2.cpp}
+\end{codebox}
+
+\section{Algorithms in the Standard Template Library}
+
+\subsection{For Each}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of for each.
+\tcblower
+\cppfile{code_examples/cpp23/for_each_code_cpp20.h}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of for each.
+\tcblower
+\cppfile{code_examples/cpp23/for_each_code_parallel.h}
+\end{codebox}
+
+\subsection{Reduce}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of reduce.
+\tcblower
+\cppfile{code_examples/cpp23/reduce_code.h}
+\end{codebox}
+
+\subsection{Merge}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of a merge.
+\tcblower
+\cppfile{code_examples/cpp23/merge_par_code.h}
+\end{codebox}

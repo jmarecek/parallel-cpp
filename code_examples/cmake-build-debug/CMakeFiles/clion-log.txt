@@ -1,0 +1,77 @@
+"/Applications/CLion 2022.app/Contents/bin/cmake/mac/bin/cmake" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc@9/9.3.0_1/bin/gcc-9 -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc@9/9.3.0_1/bin/g++-9 -G "CodeBlocks - Unix Makefiles" "/Users/jakub/Library/CloudStorage/GoogleDrive-jakub.marecek@gmail.com/My Drive/parallel-cpp/code_examples"
+-- The CXX compiler identification is AppleClang 11.0.3.11030032
+-- Check for working CXX compiler: /usr/bin/g++
+-- Check for working CXX compiler: /usr/bin/g++ - works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+CMake Error at CMakeLists.txt:19 (add_subdirectory):
+  add_subdirectory given source "openmp" which is not an existing directory.
+
+
+CMake Error at CMakeLists.txt:20 (add_subdirectory):
+  add_subdirectory given source "sycl" which is not an existing directory.
+
+
+CMake Error at algorithms/CMakeLists.txt:1 (add_executable):
+  add_executable cannot create target "for_each" because another target with
+  the same name already exists.  The existing target is an executable created
+  in source directory
+  "/Users/jakub/Library/CloudStorage/GoogleDrive-jakub.marecek@gmail.com/My
+  Drive/parallel-cpp/code_examples/cpp23".  See documentation for policy
+  CMP0002 for more details.
+
+
+CMake Error at algorithms/CMakeLists.txt:22 (add_executable):
+  add_executable cannot create target "merge_par" because another target with
+  the same name already exists.  The existing target is an executable created
+  in source directory
+  "/Users/jakub/Library/CloudStorage/GoogleDrive-jakub.marecek@gmail.com/My
+  Drive/parallel-cpp/code_examples/cpp23".  See documentation for policy
+  CMP0002 for more details.
+
+
+CMake Error at algorithms/CMakeLists.txt:31 (add_executable):
+  add_executable cannot create target "reduce" because another target with
+  the same name already exists.  The existing target is an executable created
+  in source directory
+  "/Users/jakub/Library/CloudStorage/GoogleDrive-jakub.marecek@gmail.com/My
+  Drive/parallel-cpp/code_examples/cpp23".  See documentation for policy
+  CMP0002 for more details.
+
+
+-- Configuring incomplete, errors occurred!
+See also "/Users/jakub/Library/CloudStorage/GoogleDrive-jakub.marecek@gmail.com/My Drive/parallel-cpp/code_examples/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+You have changed variables that require your cache to be deleted.
+Configure will be re-run and you may have to reset some variables.
+The following variables have changed:
+CMAKE_CXX_COMPILER= /usr/local/Cellar/gcc@9/9.3.0_1/bin/g++-9
+
+CMake Error at algorithms/CMakeLists.txt:34 (add_executable):
+  Cannot find source file:
+
+    transform.cpp
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .m .M .mm .h .hh .h++ .hm
+  .hpp .hxx .in .txx
+
+
+CMake Error at algorithms/CMakeLists.txt:37 (add_executable):
+  Cannot find source file:
+
+    adjacent_difference.cpp
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .m .M .mm .h .hh .h++ .hm
+  .hpp .hxx .in .txx
+
+
+CMake Error at algorithms/CMakeLists.txt:34 (add_executable):
+  No SOURCES given to target: transform
+
+
+CMake Error at algorithms/CMakeLists.txt:37 (add_executable):
+  No SOURCES given to target: adjacent_difference
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
