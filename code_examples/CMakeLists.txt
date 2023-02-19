@@ -4,7 +4,7 @@ set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20) # or 23 from CMAKE 3.20
 set(CMAKE_C_COMPILER "/usr/bin/gcc")
 set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
@@ -24,5 +24,5 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 add_subdirectory(introduction)
 add_subdirectory(cpp23)
 add_subdirectory(openmp)
-add_subdirectory(sycl)
-add_subdirectory(algorithms)
+# add_subdirectory(sycl)
+# add_subdirectory(algorithms)

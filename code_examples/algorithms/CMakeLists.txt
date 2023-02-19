@@ -1,3 +1,9 @@
+add_executable(accumulate accumulate.cpp)
+install(TARGETS accumulate DESTINATION bin)
+
+add_executable(accumulate_right accumulate_right.cpp)
+install(TARGETS accumulate_right DESTINATION bin)
+
 add_executable(for_each for_each.cpp)
 install(TARGETS for_each DESTINATION bin)
 
@@ -22,17 +28,5 @@ install(TARGETS merge DESTINATION bin)
 add_executable(merge_par merge_par.cpp)
 install(TARGETS merge_par DESTINATION bin)
 
-add_executable(accumulate accumulate.cpp)
-install(TARGETS accumulate DESTINATION bin)
-
-add_executable(accumulate_right accumulate_right.cpp)
-install(TARGETS accumulate_right DESTINATION bin)
-
 add_executable(reduce reduce.cpp)
 install(TARGETS reduce DESTINATION bin)
-
-add_executable(transform transform.cpp)
-install(TARGETS transform DESTINATION bin)
-
-add_executable(adjacent_difference adjacent_difference.cpp)
-install(TARGETS adjacent_difference DESTINATION bin)
