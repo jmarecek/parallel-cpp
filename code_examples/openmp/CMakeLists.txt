@@ -16,11 +16,17 @@ install(TARGETS omp_for_each1 DESTINATION bin)
 add_executable(omp_for_each2 for_each2.cpp)
 install(TARGETS omp_for_each2 DESTINATION bin)
 
+add_executable(omp_mutex1 mutex1.cpp)
+install(TARGETS omp_mutex1 DESTINATION bin)
+
 add_executable(omp_mutex2 mutex2.cpp)
 install(TARGETS omp_mutex2 DESTINATION bin)
 
 add_executable(omp_parallel2 parallel2.cpp)
 install(TARGETS omp_parallel2 DESTINATION bin)
+
+add_executable(omp_section1 section1.cpp)
+install(TARGETS omp_section1 DESTINATION bin)
 
 add_executable(omp_section2 section2.cpp)
 install(TARGETS omp_section2 DESTINATION bin)

@@ -1,18 +1,27 @@
 #include <iostream>
-#include <atomic>
-#include <thread>
-
-std::atomic<int> i(0);
+#include "omp.h"
 
 int main() {
-    auto t1 = std::jthread([](){
-    	int j;
-    	do { j = i; }
-    	while (j == 0);
-    	std::cout << j << std::endl;
-    });
-    auto t2 = std::jthread([](){
-    	i = 1;
-    });
+
+int i = 0;
+
+#pragma omp parallel
+{
+
+#pragma omp section
+    {
+      int j;
+#pragma omp atomic	
+      do { j = i; } while (j == 0);
+      std::cout << j << std::endl;
+    }
+
+#pragma omp section
+    {
+#pragma omp atomic	
+      i = 1;
+    }
+
+}
     return 0;
 }
