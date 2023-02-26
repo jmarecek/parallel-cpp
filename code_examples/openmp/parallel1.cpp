@@ -11,5 +11,5 @@ int main() {
 	    std::osyncstream(std::cout) << iam << "/" << nt << std::endl;
     }
     
-	return 0;
+    return 0;
 }
