@@ -1,3 +1,5 @@
+// Please compile with -std=c++2b -fopenmp
+
 #include <iostream>
 #include <vector>
 #include "omp.h"
