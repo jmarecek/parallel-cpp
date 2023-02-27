@@ -11,8 +11,8 @@ There are two essential models for concurrent programming: shared memory and mes
 \begin{itemize}
 \item Confinement: Do not share memory between threads. This is often impossible.
 \item Immutability: Do not share any mutable data between threads. 
-\item Thread-safe code: Use data types with additional guarantees for storing any mutable data shared between threads, or even better, use implementations of algorithms that are already parallelized and handle the concurrency issues for you (e.g., STL Library with a suitable execution policy). 
-\item Synchronization: Use synchronization primitives to prevent accessing the variable at the same time.
+\item Thread-safe code: Use data types with additional guarantees for storing any mutable data shared between threads, or even better, use implementations of algorithms that are already parallelized and handle the concurrency issues for you. For example in C++, one can use the standard template library with a suitable execution policy. In particular, the header \cpp{execution} defines objects \cpp{std::execution::seq}, \cpp{std::execution::par}, \cpp{std::execution::par_unseq}, which can be passed as the first argument of any standard algorithm, e.g., \cpp{std::vector<int> my_data; std::sort(std::execution::par,my_data.begin(),my_data.end());}. 
+\item Synchronization: Use synchronization primitives to prevent accessing the variable at the same time. This option is explored in this chapter in more detail. 
 \end{itemize}
 Eventually, we will see that message passing can be implemented using the synchronization primitives and may be the least challenging to use correctly. 
 
@@ -37,8 +37,7 @@ Within a particular thread, one may utilize multiple \emph{coroutines}, which ca
 
 That is: two coroutines within one thread never run in parallel, but one can have the runs of two or more coroutines interleaved. We can suspend a co-routine in one thread and resume it within another thread. 
 
-As it turns out, the ``context switch'' with user-level threads has a similar cost to ``co_yield''. Indeed, coroutines are typically implemented with user-level threads, which leads to cheaper context-switch compared with hardware threads. Within the user-level threads, one can distinguish stackful and stackless versions, where coroutine state is saved on the heap (as in C++20). 
-
+As it turns out, the ``context switch'' with user-level threads has a similar cost to suspending a coroutine (``co_yield''). Indeed, coroutines are typically implemented with user-level threads, which leads to cheaper context-switch compared with hardware threads. Within the user-level threads, one can distinguish stackful and stackless versions, where coroutine state is saved on the heap (as in C++). 
 
 A \emph{task} is a rather abstract unit of work, e.g., a function, which can be executed by any thread, but often allocated to one of a many threads within a pool. 
 
@@ -57,7 +56,7 @@ With memory_order_release and memory_order_acquire specifiers, we force  weakly-
 
 (In earlier version of C++ standard, there were further memory models defined for the sake of DEC Alpha architecture. At least memory_order_consume is deprecated as of C++17.) 
 
-With memory_order_seq_cst, we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent memory_order_seq_cst store.
+With \cpp{memory_order_seq_cst}, we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent \cpp{memory_order_seq_cst store}.
 
 See also \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConference} for a nice lecture. 
 
@@ -65,7 +64,7 @@ See also \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConfere
 
 Synchronization primitives are typically implemented using some hardware instructions, typically one of ``test-and-set'', ``fetch-and-add'' or ``compare-and-swap''. In locking, these make it possible to test whether the lock is free, and if so, acquire the lock within a single operation that the hardware guarantees to execute atomically.
 
-In C++, the synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as std::atomic_flag. Unlike all specializations of std::atomic, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of std::atomic_flag without setting it. C++20 adds method test(). 
+In C++, the synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as \cpp{std::atomic_flag}. Unlike all specializations of \cpp{std::atomic}, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of \cpp{std::atomic_flag} without setting it. C++20 adds method test(). 
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -86,4 +85,4 @@ A spinlock, the thread simply waits ("spins") until the lock becomes available. 
 
 Latch and Barrier are ``collective'' synchronization primitives, in that all threads approach them in the same fashion, i.e., by waiting at the latch or barrier. A latch can be used once by multiple threads, while barrier can be used repeatedly to wait until a number of threads have finished their operations. 
 
-We will also see synchronized output streams. The synchronized buffer is flushed only when the destructor of the synchronized buffer is called, but provides for guarantees of atomicity for the access. (That is, endl and std::flush no longer flush!)
+We will also see synchronized output streams. The synchronized buffer is flushed only when the destructor of the synchronized buffer is called, but provides for guarantees of atomicity for the access. (That is, \cpp{endl} and \cpp{std::flush} no longer flush!)

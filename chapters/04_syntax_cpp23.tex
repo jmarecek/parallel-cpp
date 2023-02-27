@@ -66,7 +66,7 @@
 
 \subsection{Coroutines}
 
-Although the coroutine has no return statement, it has a return type, which needs to be defined by the programmer in C++20. In C++23 and subsequent versions, we hope to see some standard types such as:
+In C++23 and subsequent versions, we hope to see some standard syntax for defining coroutines (cf. P2502). 
 
 \raggedbottom
 \begin{codebox}[]{}
@@ -75,16 +75,21 @@ Although the coroutine has no return statement, it has a return type, which need
 \cppfile{code_examples/cpp23/coroutines1.cpp}
 \end{codebox}
 
-Independently of the return type, we have the state stored in heap, using template class ``std::coroutine_handle'' as the equivalent of a pointer and its method ``destroy'' as equivalent to a free. 
-
-We also see 
+Unfortunately, defining the coroutine in C++20 take some more effort. In particular, it requires:
 \begin{itemize}
-\item ``co_await std::suspend_always{};'' suspends computation and block the co-routine until the computation is resumed by another co-routine calling ``resume'' method of the present coroutine,
-\item ``co_yield'' yields a value, and 
-\item ``co_return'' returns a value. 
+\item defining the behaviour of the coroutine, which is known as a \cpp{promise} (different from \cpp{std::promise}), and requires one returns the type used to access the state of the coroutine on the heap, which is known as the handle,  
+\item defining how to store the state of the coroutine on the heap, using template class \cpp{std::coroutine_handle} parametrized by the promise.
+\end{itemize}
+Clearly, one needs to declare one, define the other, and then return to declare the first one. We will see how to do this later.
+
+In terms of using the coroutine, there are three new keywords:
+\begin{itemize}
+\item \cpp{co_await awaiter} suspends computation and block the co-routine until the computation is resumed by another co-routine calling ``resume'' method of the present coroutine. In the process, it tests whether it is possible to suspend the computation using an awaiter such as \cpp{std::suspend_always{};} (or an awaitable object, more generally, as discussed below) and, if so, saves all local variables to a heap-allocated handle.
+\item \cpp{co_yield} yields a value and suspends computation as above, and  
+\item \cpp{co_return} returns a value. (There is no notion of an optional return type in-built.)
 \begin{end}
 
-A difficulty in using coroutines is the fact that the coroutine may live longer than the scope it has been called from. It is hence \emph{not} advisable to pass by reference. One can either pass by value or pass, e.g., ``std::unique_ptr'':
+A difficulty in using coroutines is the fact that the coroutine may live longer than the scope it has been called from. It is hence \emph{not} advisable to pass by reference, except perhaps \cpp{std::ref} or \cpp{std::cref}. One can either pass by value or pass, e.g., \cpp{std::unique_ptr}:
 
 \raggedbottom
 \begin{codebox}[]{}{}
@@ -93,6 +98,27 @@ A difficulty in using coroutines is the fact that the coroutine may live longer 
 \cppfile{code_examples/cpp23/coroutines2.cpp}
 \end{codebox}
 
+Below, we will see two examples of the use of coroutines that compile with GCC 11 and 12, when you enable -std=c++2b -fcoroutines, but illustrate that the current use of the template class \cpp{std::coroutine_handle<promise>} is a bit unwieldy. 
+First, we need to be able to define a promise class, which defines the behaviour of the coroutine by implementing methods:
+\begin{itemize}
+\item \cpp{coroutine get_return_object()} is called to inialize the coroutine and create the coroutine handle, which can be the rather formulaic \cpp{coroutine_handle::from_promise(*this)};} 
+\item \cpp{std::suspend_always initial_suspend()}, suggests whether the coroutine starts right after initialization (\cpp{std::suspend_never()} ) or upon resumption (\cpp{std::suspend_always()}). (Both awaiterers are described below.)
+\item \cpp{std::suspend_always final_suspend() noexcept}, which can be rather formulaic \cpp{std::suspend_always()}
+\item \cpp{void return_void()} or \cpp{void return_value(const auto& value)}, which is called upon reaching the end of the coroutine and upon reaching \cpp{co_return}. The latter (\cpp{return_value}) often just stores the result locally. 
+\item \cpp{void unhandled_exception()}, which can be rather formulaic \cpp{std::terminate()}, or can save the exception via \cpp{std::current_exception()}.
+\end{itemize}
+
+The promise class is instantiated for each instance of the coroutine, and its methods are called as follows:
+
+\raggedbottom
+\begin{codebox}[]{}
+\footnotesize An schema of the coroutine, in terms of its calls of the methods of the promise class.
+\tcblower
+\cppfile{code_examples/cpp23/coroutines_schema.h}
+\end{codebox}
+
+Once we have a promise class, we can specialize template class \cpp{std::coroutine_handle}, which can be seen as the equivalent of a pointer and its method ``destroy'' as equivalent to a ``free'', and use the handle specialized to our own promise class to define a promise class:
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/1nYdMPh3z}{\ExternalLink}}
 \footnotesize An example of the use of coroutines.
@@ -100,12 +126,50 @@ A difficulty in using coroutines is the fact that the coroutine may live longer 
 \cppfile{code_examples/cpp23/coroutines3.cpp}
 \end{codebox}
 
+Sometimes, we also store the promise type in a \cpp{promise_type} type member, and disable (\cpp{= delete}) copy and move constructors. 
+
+\subsubsection{Awaiters}
+
+Finally, let us consider awaiters, which can be called when a coroutine is suspended or resumed. 
+Key methods of an awaiter include:
+\begin{itemize}
+\item \cpp{await_ready()} is called immediately before suspension of a coroutine. If it returns \cpp{true}, the coroutine will not be suspended. 
+\item \cpp{await_suspend(handler)} is called immediately after the suspension of the coroutine. The \cpp{handler} of type \cpp{std::coroutine_handle} can be used to pass the state of the coroutine (e.g., to another thread). 
+\item \cpp{await_resume()} is called when the coroutine is resumed after a successful suspension. If it returns a value, this will be returned by the \cpp{co_await} routine. 
+\end{itemize}
+The awaiters we have seen so far (\cpp{std::suspend_never()} and \cpp{std::suspend_always()}) returned boolean constants in \cpp{await_ready()}:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of two standard awaiters.
+\tcblower
+\cppfile{code_examples/cpp23/awaiters1.cpp}
+\end{codebox}
+
+By defining \cpp{await_transform()} in the promise type, the compiler will use \cpp{co_await promise.await_transform(<expr>)} instead of any call of \cpp{co_await <expr>} in the coroutine. 
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of coroutines.
 \tcblower
 \cppfile{code_examples/cpp23/coroutines4.cpp}
 \end{codebox}
+
+Eventually, in C++23 and C++23, the support for message-passing architectures based on \url{https://github.com/lewissbaker/cppcoro} should be available. For a small sample, see a custom implementation here:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of coroutines.
+\tcblower
+\cppfile{code_examples/cpp23/coroutines5.cpp}
+\end{codebox}
+
+For more nice examples, see Boost Asio, e.g.,
+\url{https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/example/cpp20/channels/throttling_proxy.cpp}, 
+as discussed, e.g., at
+\url{https://www.youtube.com/watch?app=desktop&v=ZNttI_WswMU&ab_channel=ACCUConference}.
+For more details, see Simon Toth's Complete guide at \url{https://itnext.io/c-20-coroutines-complete-guide-7c3fc08db89d}.
+For the technical specification, see \url{https://github.com/GorNishanov/coroutines-ts}.
 
 \section{Synchronisation Primitives}
 
