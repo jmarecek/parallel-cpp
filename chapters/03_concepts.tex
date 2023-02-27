@@ -1,5 +1,89 @@
 \chapter{The Concepts}
 
+Parallelism means two or more tasks can be executed simultaneously. This is an option, which the compiler and operating system and processor can exercise, but does not come with any guarantees. 
+Often, this means no shared variables or other resources, and need not require any synchronization primitives.
+
+Concurrency means that two or more tasks start, run, and complete in overlapping time periods, while sharing some resources. 
+If two tasks concurrently set shared variable x to 1 and 2, it is not clear what value it would have, subsequently.
+More broadly, concurrent access to a mutable shared memory can result in issues (``data race''). 
+
+There are two essential models for concurrent programming: shared memory and message passing. In sharing memory, we have broadly four options:
+\begin{itemize}
+\item Confinement: Do not share memory between threads. This is often impossible.
+\item Immutability: Do not share any mutable data between threads. 
+\item Thread-safe code: Use data types with additional guarantees for storing any mutable data shared between threads, or even better, use implementations of algorithms that are already parallelized and handle the concurrency issues for you (e.g., STL Library with a suitable execution policy). 
+\item Synchronization: Use synchronization primitives to prevent accessing the variable at the same time.
+\end{itemize}
+Eventually, we will see that message passing can be implemented using the synchronization primitives and may be the least challenging to use correctly. 
+
+\section{Structuring code: Processes, Threads, Tasks, Coroutines}
+
+Processes, threads, tasks, and coroutines execute instructions. 
+
+A \emph{process} provides all of the prerequisites for executing instructions: loads an executable program, sets up a virtual address space, the environment (e.g. environment variables and a security context), the process control block (PCB, often stored in registers of the processor and on a per-process stack in kernel memory), opens handles to system objects (e.g., files, sockets), and often much more. In some sense, one can imagine ``a virtual machine''.
+
+Within a particular process, there is at least one \emph{thread}. All threads of a particular process share the same virtual address space and handles to system objects. Each thread, independently, operates its own context (registers, stack, exception handlers). Unless declared otherwise, threads of a particular process share memory and are allocated ``time slices'' by the operating system. This can be seen as a ``virtual processor'' within a ``a virtual machine'' of a process, often with no guarantees on the time slicing.
+
+All modern operating systems (OS) are multitasking, i.e., running multiple processes with the operating system forcibly interrupting the run one one process to execute another process after a certain amount of time (``preemptive scheduling''). Switching between the processes involves swapping the process control block (PCB). In Intel architectures, this is known as the task state segment (TSS), and there is hardware support for the switch. AMD64 does not support task switches in hardware.
+Consequently, neither Windows nor Linux kernels utilize the hardware support for the switch.
+Context switching thus has non-trivial impact on performance. 
+
+Most modern processors are multi-core and support multithreading in some form. This means that one 
+each process can execute multiple ``hardware threads'' and there is some support for switching between those. In Intel architectures, hyper-threading means each hardware core can execute multiple threads, e.g., two, to take advantage of idle time (e.g., loading data, network communications).  
+
+Most modern operating systems \emph{do not guarantee} fairness among the threads. 
+
+Within a particular thread, one may utilize multiple \emph{coroutines}, which can be seen as subroutines that can run in multiple steps, but sometimes can serve as a light-weight alternative to hardware threads. Coroutines can be called, can return when completed, but also can suspend themselves, yielding control and partial results, and be resumed by another co-routine. Typical uses involve generators andfactories and various other concepts within ``lazy evaluation'', as well as event-driven architectures within cooperative multi-tasking. 
+
+That is: two coroutines within one thread never run in parallel, but one can have the runs of two or more coroutines interleaved. We can suspend a co-routine in one thread and resume it within another thread. 
+
+As it turns out, the ``context switch'' with user-level threads has a similar cost to ``co_yield''. Indeed, coroutines are typically implemented with user-level threads, which leads to cheaper context-switch compared with hardware threads. Within the user-level threads, one can distinguish stackful and stackless versions, where coroutine state is saved on the heap (as in C++20). 
 
 
+A \emph{task} is a rather abstract unit of work, e.g., a function, which can be executed by any thread, but often allocated to one of a many threads within a pool. 
 
+\section{Synchronization primitives}
+
+Synchronization primitives make it possible to synchronize or restrict access of multiple threads to some resources (e.g., global variables, file handles, sockets). You can use them as an interface, without knowing their implementation. 
+
+\subsection{Memory order}
+
+First, one should like to understand several options for implementing synchronization primitives, known as ``memory orders''.
+All guarantee atomicity and modification-order consistency.
+
+In memory_order_relaxed, no further guarantees are provided and specifically no order is imposed on concurrent memory accesses. This is also how weakly-ordered architectures (e.g. ARM) operate, by default: if two threads access shared memory the load in one thread does not have to read a value written by another thread very recently.
+
+With memory_order_release and memory_order_acquire specifiers, we force  weakly-ordered achitectures to behave closer to strongly-ordered architectures (e.g., Intel). If one thread writes into shared memory atomically with memory_order_release and another thread reads the memory atomically with memory_order_acquire, the load in the second thread is guaranteed to read the value written by another thread. 
+
+(In earlier version of C++ standard, there were further memory models defined for the sake of DEC Alpha architecture. At least memory_order_consume is deprecated as of C++17.) 
+
+With memory_order_seq_cst, we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent memory_order_seq_cst store.
+
+See also \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConference} for a nice lecture. 
+
+\subsection{Hardware support for synchronization primitives}
+
+Synchronization primitives are typically implemented using some hardware instructions, typically one of ``test-and-set'', ``fetch-and-add'' or ``compare-and-swap''. In locking, these make it possible to test whether the lock is free, and if so, acquire the lock within a single operation that the hardware guarantees to execute atomically.
+
+In C++, the synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as std::atomic_flag. Unlike all specializations of std::atomic, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of std::atomic_flag without setting it. C++20 adds method test(). 
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize A silly implementation of a spin lock.
+\tcblower
+\cppfile{code_examples/cpp23/atomic4.h}
+\end{codebox}
+
+\subsection{Raw synchronization primitives}
+
+Lock, Mutex, Semaphore, Atomic, Memory Fence, Condition Variable are synchronization primitives, which make it possible to synchronize or restrict access of multiple threads to some resources. 
+
+Lock is a very general term for a synchronization primitive. Mutexes are usually used by one thread only, while semaphores are shared between multiple threads. The \emph{binary semaphore} is the most simple type of a lock, which provides exclusive access for both reading and writing. \emph{counting semaphore} limits the use of a single resource by at most a given number of threads. 
+
+A spinlock, the thread simply waits ("spins") until the lock becomes available. This is efficient if threads are blocked for a short time, because it avoids the overhead of operating system process re-scheduling. It is inefficient if the lock is held for a long time, or if the progress of the thread that is holding the lock depends on preemption of the locked thread.
+
+\subsection{Further synchronization features}
+
+Latch and Barrier are ``collective'' synchronization primitives, in that all threads approach them in the same fashion, i.e., by waiting at the latch or barrier. A latch can be used once by multiple threads, while barrier can be used repeatedly to wait until a number of threads have finished their operations. 
+
+We will also see synchronized output streams. The synchronized buffer is flushed only when the destructor of the synchronized buffer is called, but provides for guarantees of atomicity for the access. (That is, endl and std::flush no longer flush!)

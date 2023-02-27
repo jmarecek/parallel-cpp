@@ -66,12 +66,25 @@
 
 \subsection{Coroutines}
 
+Although the coroutine has no return statement, it has a return type, which needs to be defined by the programmer in C++20. In C++23 and subsequent versions, we hope to see some standard types such as:
+
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\begin{codebox}[]{}
 \footnotesize An example of the use of coroutines, which currently does not compile in GCC 12.2.
 \tcblower
 \cppfile{code_examples/cpp23/coroutines1.cpp}
 \end{codebox}
+
+Independently of the return type, we have the state stored in heap, using template class ``std::coroutine_handle'' as the equivalent of a pointer and its method ``destroy'' as equivalent to a free. 
+
+We also see 
+\begin{itemize}
+\item ``co_await std::suspend_always{};'' suspends computation and block the co-routine until the computation is resumed by another co-routine calling ``resume'' method of the present coroutine,
+\item ``co_yield'' yields a value, and 
+\item ``co_return'' returns a value. 
+\begin{end}
+
+A difficulty in using coroutines is the fact that the coroutine may live longer than the scope it has been called from. It is hence \emph{not} advisable to pass by reference. One can either pass by value or pass, e.g., ``std::unique_ptr'':
 
 \raggedbottom
 \begin{codebox}[]{}{}
