@@ -4,6 +4,8 @@
 
 \subsection{C++11 Threads}
 
+C++11 had a very basic support for threads, which required that one calls \cpp{join} or \cpp{detach} prior to the destructor being called. If neither was called, the program was \cpp{std::abort}ed. At the same time, it was almost impossible to handle exceptions while being able to call \cpp{join} correctly. The use of the C++11 \cpp{thread} is thus considered harmful and we will present only two short examples.
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of a C++11 thread.
@@ -18,7 +20,9 @@
 \cppfile{code_examples/cpp23/thread2.cpp}
 \end{codebox}
 
-\subsection{C++20 Threads}
+\subsection{C++20 JThreads}
+
+C++20 adds a new class \cpp{jthread} (``joining threads''), which does not require a call to \cpp{join} or \cpp{detach}. Instead, the destructor waits for completion of the code (``joins'') automatically. This is an example of the 
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -78,9 +82,10 @@ In C++23 and subsequent versions, we hope to see some standard syntax for defini
 Unfortunately, defining the coroutine in C++20 take some more effort. In particular, it requires:
 \begin{itemize}
 \item defining the behaviour of the coroutine, which is known as a \cpp{promise} (different from \cpp{std::promise}), and requires one returns the type used to access the state of the coroutine on the heap, which is known as the handle,  
-\item defining how to store the state of the coroutine on the heap, using template class \cpp{std::coroutine_handle} parametrized by the promise.
+\item defining how to store the state of the coroutine on the heap, using template class \cpp{std::coroutine_handle} parametrized by the promise
 \end{itemize}
 Clearly, one needs to declare one, define the other, and then return to declare the first one. We will see how to do this later.
+Optionally, we can also define an awaiter, which controls suspension and resumption behaviour.
 
 In terms of using the coroutine, there are three new keywords:
 \begin{itemize}

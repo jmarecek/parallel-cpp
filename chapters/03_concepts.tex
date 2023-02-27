@@ -37,7 +37,7 @@ Within a particular thread, one may utilize multiple \emph{coroutines}, which ca
 
 That is: two coroutines within one thread never run in parallel, but one can have the runs of two or more coroutines interleaved. We can suspend a co-routine in one thread and resume it within another thread. 
 
-As it turns out, the ``context switch'' with user-level threads has a similar cost to suspending a coroutine (``co_yield''). Indeed, coroutines are typically implemented with user-level threads, which leads to cheaper context-switch compared with hardware threads. Within the user-level threads, one can distinguish stackful and stackless versions, where coroutine state is saved on the heap (as in C++). 
+As it turns out, the ``context switch'' with user-level threads has a similar cost to a function call or suspending a coroutine (\cpp{co_yield}). Indeed, coroutines are typically implemented with user-level threads, which leads to cheaper context-switch compared with hardware threads. Within the user-level threads, one can distinguish stackful and stackless versions, where coroutine state is saved on the heap (as in C++). 
 
 A \emph{task} is a rather abstract unit of work, e.g., a function, which can be executed by any thread, but often allocated to one of a many threads within a pool. 
 
@@ -50,9 +50,9 @@ Synchronization primitives make it possible to synchronize or restrict access of
 First, one should like to understand several options for implementing synchronization primitives, known as ``memory orders''.
 All guarantee atomicity and modification-order consistency.
 
-In memory_order_relaxed, no further guarantees are provided and specifically no order is imposed on concurrent memory accesses. This is also how weakly-ordered architectures (e.g. ARM) operate, by default: if two threads access shared memory the load in one thread does not have to read a value written by another thread very recently.
+In \cpp{memory_order_relaxed}, no further guarantees are provided and specifically no order is imposed on concurrent memory accesses. This is also how weakly-ordered architectures (e.g. ARM) operate, by default: if two threads access shared memory the load in one thread does not have to read a value written by another thread very recently.
 
-With memory_order_release and memory_order_acquire specifiers, we force  weakly-ordered achitectures to behave closer to strongly-ordered architectures (e.g., Intel). If one thread writes into shared memory atomically with memory_order_release and another thread reads the memory atomically with memory_order_acquire, the load in the second thread is guaranteed to read the value written by another thread. 
+With \cpp{memory_order_release} and memory_order_acquire specifiers, we force  weakly-ordered achitectures to behave closer to strongly-ordered architectures (e.g., Intel). If one thread writes into shared memory atomically with \cpp{memory_order_release} and another thread reads the memory atomically with memory_order_acquire, the load in the second thread is guaranteed to read the value written by another thread. 
 
 (In earlier version of C++ standard, there were further memory models defined for the sake of DEC Alpha architecture. At least memory_order_consume is deprecated as of C++17.) 
 
