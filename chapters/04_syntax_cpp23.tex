@@ -4,7 +4,12 @@
 
 \subsection{C++11 Threads}
 
-C++11 had a very basic support for threads, which required that one calls \cpp{join} or \cpp{detach} prior to the destructor being called. If neither was called, the program was \cpp{std::abort}ed. At the same time, it was almost impossible to handle exceptions while being able to call \cpp{join} correctly. The use of the C++11 \cpp{thread} is thus considered harmful and we will present only two short examples.
+C++11 had a very basic support for threads, in terms of \cpp{std::thread} of header \cpp{thread}. The thread starts running once the constructor is called. The object is not CopyConstructible nor CopyAssignable. 
+The challenge in C++11 threads is that one needs to call \cpp{join} or \cpp{detach} prior to the destructor being called. If neither was called, the program was \cpp{std::abort}ed. 
+Prior to calling either, one needs to check whether the thread is \cpp{joinable()}.
+At the same time, it was almost impossible to handle exceptions while being able to call \cpp{join} correctly. 
+%std::promise
+The use of the C++11 \cpp{thread} is thus considered harmful and we will present only two short examples.
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}

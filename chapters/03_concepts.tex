@@ -5,7 +5,67 @@ Often, this means no shared variables or other resources, and need not require a
 
 Concurrency means that two or more tasks start, run, and complete in overlapping time periods, while sharing some resources. 
 If two tasks concurrently set shared variable x to 1 and 2, it is not clear what value it would have, subsequently.
-More broadly, concurrent access to a mutable shared memory can result in issues (``data race''). 
+More broadly, concurrent access to a mutable shared memory can result in issues without the use of synchronization 
+primitives (``data race'') and with the use of synchronization primitives (``deadlock'').
+
+\subsection{Data race}
+
+When we need to ensure mutual exclusion in access to two or more shared variables, 
+e.g., read value of one of the variables and add it to another variable, 
+we may need to use some synchronization primitives (e.g., mutexes).
+Without the use of synchronization primitives, we are facing the risk of a data race. 
+
+For example, consider the situation in a bank, where there are two clients:
+Alice and Bob. 
+Transaction T1: Bob has \$100 in his account, but will be paying a \$50 bill. 
+At the same time, in Transaction T2, Alice will be paying \$100 to Bob.
+Depending on the ordering of the reading and writing operations, one may obtain several outcomes:
+\begin{itemize}
+\item Transaction T1 will read \$100 valued of Bob's account. Transaction T2 will read \$100 value.
+ Transaction T1 will write \$200. Transaction T2 will write \$50 value.
+\item Transaction T1 will read \$100 valued of Bob's account. 
+ Transaction T1 will write \$50. Transaction T2 will read \$50 value.Transaction T2 will write \$150 value.
+\item Transaction T1 will read \$100 valued of Bob's account. Transaction T2 will read \$100 value.
+ Transaction T1 will write \$50. Transaction T2 will write \$200 value.
+\item Transaction T2 will read \$100 value. Transaction T2 will write \$200 value.
+  Transaction T1 will read \$200 valued of Bob's account.  Transaction T1 will write \$150.  
+\end{itemize}
+Either Bob or the bank could be \$50 short. 
+
+\subsection{Deadlock}
+
+When we need to ensure mutual exclusion in access to two or more shared variables, 
+e.g., two temporary results associated with two mutexes, 
+one may naively lock the first mutex first, and subsequently lock the other mutex. This, however, 
+can lead to a deadlock. One needs to lock both mutexes at the same time.  
+
+Naively, one could run:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize Locking multiple mutexes at once.
+\tcblower
+\cppfile{code_examples/cpp23/lock.h}
+\end{codebox}
+
+Better, one could consider:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize Locking multiple mutexes at once.
+\tcblower
+\cppfile{code_examples/cpp23/scoped_lock.h}
+\end{codebox}
+
+In theory, a deadlock (Czech: ``problém uváznutí'') can occur when:
+\begin{itemize}
+\item each lock is owned by at most one thread
+\item each thread has locked at least one thread and needs to lock at least one more thread
+\item it is impossible to remove the lock ownership
+\item there is a cyclic dependency among the locks
+\end{itemize}
+
+\subsection{Concurrent programming}
 
 There are two essential models for concurrent programming: shared memory and message passing. In sharing memory, we have broadly four options:
 \begin{itemize}
@@ -54,9 +114,9 @@ With \cpp{memory_order_release} and memory_order_acquire specifiers, we force  w
 
 (In earlier version of C++ standard, there were further memory models defined for the sake of DEC Alpha architecture. At least memory_order_consume is deprecated as of C++17.) 
 
-With \cpp{memory_order_seq_cst}, we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent \cpp{memory_order_seq_cst store}.
+With \cpp{memory_order_seq_cst}, we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent \cpp{memory_order_seq_cst store}. This is the default option. 
 
-See also \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConference} for a nice lecture. 
+See \url{https://arxiv.org/abs/1803.04432} for a nice overview and \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConference} for a nice lecture. 
 
 \subsection{Compare and swap}
 
@@ -87,6 +147,8 @@ All four ARM instructions utilize only two registers, compared to three register
 
 In C++, the \emph{only} synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as \cpp{std::atomic_flag}. Unlike all specializations of \cpp{std::atomic}, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of \cpp{std::atomic_flag} without setting it. C++20 adds method \cpp{test()}. 
 
+%\subsection{Fetch and add}
+
 \section{Synchronization primitives}
 
 Synchronization primitives make it possible to synchronize or restrict access of multiple threads to some resources (e.g., global variables, file handles, sockets). You can use them as an interface, without knowing their implementation. 
@@ -108,6 +170,10 @@ A spinlock, the thread simply waits ("spins") until the lock becomes available. 
 
 \subsection{Further synchronization features}
 
-Latch and Barrier are ``collective'' synchronization primitives, in that all threads approach them in the same fashion, i.e., by waiting at the latch or barrier. A latch can be used once by multiple threads, while barrier can be used repeatedly to wait until a number of threads have finished their operations. 
+Fences help order non-atomic and atomic memory accesses, without any associated operations. On Intel architectures (including x86-64), \cpp{atomic_thread_fence} do not issue any instructions, except \cpp{std::atomic_thread_fence(std::memory_order::seq_cst)}.
+
+Barrier provides a thread-coordination mechanism that blocks a group of threads until all threads in that group have reached the barrier. Such a barrier can be used repeatedly to wait until a number of threads have finished their operations. 
+
+Latch and is a downward counter, whose initial value is initialized and then threads may block on the latch until the counter is  zero. One thread may decrement a latch multiple times, but no thread can increment the latch. Thus, it serves as a single-use barrier.
 
 We will also see synchronized output streams. The synchronized buffer is flushed only when the destructor of the synchronized buffer is called, but provides for guarantees of atomicity for the access. (That is, \cpp{endl} and \cpp{std::flush} no longer flush!)
