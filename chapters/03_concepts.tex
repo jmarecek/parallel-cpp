@@ -60,7 +60,7 @@ See also \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConfere
 
 \subsection{Compare and swap}
 
-Synchronization primitives are typically implemented using some hardware instructions, typically one of ``test-and-set'', ``fetch-and-add'' or ``compare-and-swap''. In locking, these make it possible to test whether the lock is free, and if so, acquire the lock within a single operation that the hardware guarantees to execute atomically.
+Synchronization primitives are typically implemented using some hardware instructions, typically ``compare-and-swap''. In locking, these make it possible to test whether the lock is free, and if so, acquire the lock within a single operation that the hardware guarantees to execute atomically.
 
 The atomic „compare and swap“ (CAS) instruction dereferences a pointer to an atomic variable and compares its value against a given value. If these is a match, it replaces the atomic variable with a given new value. That is:
 \begin{itemize}
@@ -83,17 +83,9 @@ The former is called with the desired value \cpp{i}, the new value {i}, and the 
 
 The difference between the ``weak'' and ``strong'' variant is in that the weak variant may return false even if there is a match, in certain cases, but can be much faster in certain architectures. This notably entails ARM architectures (RISC-V and MIPS), where the weak variant will be implemented using the so called load-link/store-conditional pair of instructions (load exclusive register / ldxr and store exclusive register / stxr in ARM version 8).
 These are much faster than the comparable instructions issuing a barrier (ldaxr/stlxr in ARM version 8).
-All four ARM instructions utilize only two registers, compared to three registers for CAS proper in Intel architectures (Compare and exchange / cmpxchg). On Intel architectures, cmpxchg is onlhy marginally more expensive than a non-cached load.
+All four ARM instructions utilize only two registers, compared to three registers for CAS proper in Intel architectures (Compare and exchange / cmpxchg since 80486 and cmpxchg8b and cmpxchg16b since Intel Core 2). On recent Intel and AMD processors, cmpxchg is only marginally slower than a non-cached load.
 
-In C++, the \emph{only} synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as \cpp{std::atomic_flag}. Unlike all specializations of \cpp{std::atomic}, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of \cpp{std::atomic_flag} without setting it. C++20 adds method test(). 
-
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize A silly implementation of a spin lock.
-\tcblower
-\cppfile{code_examples/cpp23/atomic4.h}
-\end{codebox}
-
+In C++, the \emph{only} synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as \cpp{std::atomic_flag}. Unlike all specializations of \cpp{std::atomic}, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of \cpp{std::atomic_flag} without setting it. C++20 adds method \cpp{test()}. 
 
 \section{Synchronization primitives}
 
@@ -105,7 +97,14 @@ Lock, Mutex, Semaphore, Atomic, Memory Fence, Condition Variable are synchroniza
 
 Lock is a very general term for a synchronization primitive. Mutexes are usually used by one thread only, while semaphores are shared between multiple threads. The \emph{binary semaphore} is the most simple type of a lock, which provides exclusive access for both reading and writing. \emph{counting semaphore} limits the use of a single resource by at most a given number of threads. 
 
-A spinlock, the thread simply waits ("spins") until the lock becomes available. This is efficient if threads are blocked for a short time, because it avoids the overhead of operating system process re-scheduling. It is inefficient if the lock is held for a long time, or if the progress of the thread that is holding the lock depends on preemption of the locked thread.
+A spinlock, the thread simply waits ("spins") until the lock becomes available. This is efficient if threads are blocked for a short time, because it avoids the overhead of operating system process re-scheduling. It is inefficient if the lock is held for a long time, or if the progress of the thread that is holding the lock depends on preemption of the locked thread. An intentionally simplistic implementation is presented below.
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize A silly implementation of a spin lock.
+\tcblower
+\cppfile{code_examples/cpp23/atomic4.h}
+\end{codebox}
 
 \subsection{Further synchronization features}
 
