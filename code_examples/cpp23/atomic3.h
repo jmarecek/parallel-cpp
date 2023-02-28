@@ -1,44 +1,47 @@
-// inspired by https://www.modernescpp.com/index.php/atomic-smart-pointers
+// based on https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/std/atomic
 
-#include <iostream>
-#include <atomic>
-#include <thread>
-#include <memory>
+  template<typename _Tp>
+    struct atomic
+    {
+      using value_type = _Tp;
 
-template<typename T> class concurrent_stack {
-    struct Node { T t; shared_ptr<Node> next; };
-    atomic_shared_ptr<Node> head;
-    concurrent_stack( concurrent_stack &) = delete;
-    void operator=(concurrent_stack&) = delete;
+[...]
 
-public:
-    concurrent_stack() =default;
-    ~concurrent_stack() =default;
-    class reference {
-        shared_ptr<Node> p;
-    public:
-       reference(shared_ptr<Node> p_) : p{p_} { }
-       T& operator* () { return p->t; }
-       T* operator->() { return &p->t; }
+      bool
+      compare_exchange_strong(_Tp& __e, _Tp __i, memory_order __s,
+			      memory_order __f) noexcept
+      {
+	return __atomic_impl::__compare_exchange(_M_i, __e, __i, false,
+						 __s, __f);
+      }
+
+      bool
+      compare_exchange_weak(_Tp& __e, _Tp __i, memory_order __s,
+			    memory_order __f) noexcept
+      {
+	return __atomic_impl::__compare_exchange(_M_i, __e, __i, true,
+						 __s, __f);
+      }
+
+[...]
     };
 
-    auto find( T t ) const {
-        auto p = head.load();
-        while( p && p->t != t )
-            p = p->next;
-        return reference(move(p));
-    }
-    auto front() const {
-       return reference(head);
-    }
-    void push_front( T t ) {
-      auto p = make_shared<Node>();
-      p->t = t;
-      p->next = head;
-      while( !head.compare_exchange_weak(p->next, p) ){ }
-    }
-    void pop_front() {
-       auto p = head.load();
-       while( p && !head.compare_exchange_weak(p, p->next) ){ }
-    }
-};
+
+
+  /// Partial specialization for pointer types.
+  template<typename _Tp>
+    struct atomic<_Tp*>
+    {
+      using value_type = _Tp*;
+      using difference_type = ptrdiff_t;
+
+[...]
+
+     bool
+      compare_exchange_strong(__pointer_type& __p1, __pointer_type __p2,
+			      memory_order __m1, memory_order __m2) noexcept
+      { return _M_b.compare_exchange_strong(__p1, __p2, __m1, __m2); }
+
+[...]
+
+    };

@@ -41,9 +41,7 @@ As it turns out, the ``context switch'' with user-level threads has a similar co
 
 A \emph{task} is a rather abstract unit of work, e.g., a function, which can be executed by any thread, but often allocated to one of a many threads within a pool. 
 
-\section{Synchronization primitives}
-
-Synchronization primitives make it possible to synchronize or restrict access of multiple threads to some resources (e.g., global variables, file handles, sockets). You can use them as an interface, without knowing their implementation. 
+\section{Hardware support}
 
 \subsection{Memory order}
 
@@ -60,11 +58,34 @@ With \cpp{memory_order_seq_cst}, we additionally require a single total ordering
 
 See also \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConference} for a nice lecture. 
 
-\subsection{Hardware support for synchronization primitives}
+\subsection{Compare and swap}
 
 Synchronization primitives are typically implemented using some hardware instructions, typically one of ``test-and-set'', ``fetch-and-add'' or ``compare-and-swap''. In locking, these make it possible to test whether the lock is free, and if so, acquire the lock within a single operation that the hardware guarantees to execute atomically.
 
-In C++, the synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as \cpp{std::atomic_flag}. Unlike all specializations of \cpp{std::atomic}, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of \cpp{std::atomic_flag} without setting it. C++20 adds method test(). 
+The atomic „compare and swap“ (CAS) instruction dereferences a pointer to an atomic variable and compares its value against a given value. If these is a match, it replaces the atomic variable with a given new value. That is:
+\begin{itemize}
+\item we declare an atomic variable (and a pointer to it)
+\item (*) we save the value of an atomic variable to a local, private variable (by dereferencing the pointer)
+\item based on the saved value in a local, private variable, we compute the new value, which we would like to store in the atomic variable
+\item the CAS instruction is used. If the current value matches the value saved in the local, private variable, we will overwrite the value with the newly computed value. If the current value no longer matches the value saved in the local, private variable, we wait (some random and growing from a small starting value) and repeat from (*). 
+\end{itemize}
+
+In C++, the \cpp{atomic} header defines two variants of ``compare and swap'' and a specialization thereof for pointers:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize Definitions of two variants of ``compare and swap''.
+\tcblower
+\cppfile{code_examples/cpp23/atomic3.h}
+\end{codebox}
+
+The former is called with the desired value \cpp{i}, the new value {i}, and the memory order to consider if there is a match and if there is no match. Typically, if there is a match and we want to replace the value, we may use \cpp{std::memory_order_release}. If there is no match, we are just reading the value and \cpp{std::memory_order_acquire} would suffice. In the latter variant, we pass two pointers. 
+
+The difference between the ``weak'' and ``strong'' variant is in that the weak variant may return false even if there is a match, in certain cases, but can be much faster in certain architectures. This notably entails ARM architectures (RISC-V and MIPS), where the weak variant will be implemented using the so called load-link/store-conditional pair of instructions (load exclusive register / ldxr and store exclusive register / stxr in ARM version 8).
+These are much faster than the comparable instructions issuing a barrier (ldaxr/stlxr in ARM version 8).
+All four ARM instructions utilize only two registers, compared to three registers for CAS proper in Intel architectures (Compare and exchange / cmpxchg). On Intel architectures, cmpxchg is onlhy marginally more expensive than a non-cached load.
+
+In C++, the \emph{only} synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as \cpp{std::atomic_flag}. Unlike all specializations of \cpp{std::atomic}, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of \cpp{std::atomic_flag} without setting it. C++20 adds method test(). 
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -72,6 +93,11 @@ In C++, the synchronization primitive that is guaranteed to be hardware implemen
 \tcblower
 \cppfile{code_examples/cpp23/atomic4.h}
 \end{codebox}
+
+
+\section{Synchronization primitives}
+
+Synchronization primitives make it possible to synchronize or restrict access of multiple threads to some resources (e.g., global variables, file handles, sockets). You can use them as an interface, without knowing their implementation. 
 
 \subsection{Raw synchronization primitives}
 

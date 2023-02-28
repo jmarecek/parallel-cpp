@@ -22,7 +22,9 @@ C++11 had a very basic support for threads, which required that one calls \cpp{j
 
 \subsection{C++20 JThreads}
 
-C++20 adds a new class \cpp{jthread} (``joining threads''), which does not require a call to \cpp{join} or \cpp{detach}. Instead, the destructor waits for completion of the code (``joins'') automatically. This is an example of the 
+C++20 adds a new class \cpp{jthread} (``joining threads''), which does not require a call to \cpp{join} or \cpp{detach}. Instead, the destructor waits for completion of the code (``joins'') automatically. 
+
+This is an example of the ``resource acquisition is initialization'' idiom, which is generally one of the best practices in C++. In RAII, the resource allocation is tied to an object's lifetime and is hence a class invariant. In a constructor, one allocates the resources. In a destructor, one releases the resources. There is no risk of a resource leak. 
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -66,7 +68,7 @@ C++20 adds a new class \cpp{jthread} (``joining threads''), which does not requi
 \cppfile{code_examples/cpp23/jthread6.cpp}
 \end{codebox}
 
-\subsection{Tasks}
+%\subsection{Tasks}
 
 \subsection{Coroutines}
 
@@ -148,7 +150,7 @@ The awaiters we have seen so far (\cpp{std::suspend_never()} and \cpp{std::suspe
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of two standard awaiters.
 \tcblower
-\cppfile{code_examples/cpp23/awaiters1.cpp}
+\cppfile{code_examples/cpp23/awaiters1.h}
 \end{codebox}
 
 By defining \cpp{await_transform()} in the promise type, the compiler will use \cpp{co_await promise.await_transform(<expr>)} instead of any call of \cpp{co_await <expr>} in the coroutine. 
@@ -196,6 +198,8 @@ For the technical specification, see \url{https://github.com/GorNishanov/corouti
 
 \subsection{Atomic Variables}
 
+First, let us consider two simple examples:
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of atomic variables.
@@ -210,11 +214,20 @@ For the technical specification, see \url{https://github.com/GorNishanov/corouti
 \cppfile{code_examples/cpp23/atomic2.cpp}
 \end{codebox}
 
+Finally, let us consider two, more complete examples of a stack:
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An elaborate example of the use of atomic variables.
 \tcblower
-\cppfile{code_examples/cpp23/atomic3.h}
+\cppfile{code_examples/cpp23/atomic5.cpp}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An elaborate example of the use of atomic variables.
+\tcblower
+\cppfile{code_examples/cpp23/atomic6.h}
 \end{codebox}
 
 \subsection{Mutexes}
