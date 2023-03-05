@@ -38,12 +38,16 @@ This is an example of the ``resource acquisition is initialization'' idiom, whic
 \cppfile{code_examples/cpp23/jthread1.cpp}
 \end{codebox}
 
+Notice that the above example would very like result in abnormal program termination, if we changed jthread to thread. (Why?) When we use standard output, it is prudent to wrap it in a syncstream: 
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of jthread.
 \tcblower
 \cppfile{code_examples/cpp23/jthread2.cpp}
 \end{codebox}
+
+Rather commonly, one uses the lambda function to define the thread. (This is the \cpp{[]()}.) 
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -52,12 +56,16 @@ This is an example of the ``resource acquisition is initialization'' idiom, whic
 \cppfile{code_examples/cpp23/jthread3.cpp}
 \end{codebox}
 
+Passing arguments to threads is, nevertheless, very useful. Notably, when we pass the first argument of type \cpp{std::stop_token token}, we request the thread to stop its execution by calling \cpp{request_stop()} on the jthread object:
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of jthread.
 \tcblower
 \cppfile{code_examples/cpp23/jthread4.cpp}
 \end{codebox}
+
+More complicated procedures for the stopping of the thread possible. One can define \cpp{std::stop_callback} object inside the thread, whose constructor takes the stop token (\cpp{std::stop_token}) and a function. The function (in the example below another lambda) gets executed, when the thread is requested to stop via the \cpp{std::stop_token}:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -66,18 +74,21 @@ This is an example of the ``resource acquisition is initialization'' idiom, whic
 \cppfile{code_examples/cpp23/jthread5.cpp}
 \end{codebox}
 
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An example of the use of jthread.
-\tcblower
-\cppfile{code_examples/cpp23/jthread6.cpp}
-\end{codebox}
+(For a substantially more complex example, see \url{https://en.cppreference.com/w/cpp/thread/stop_callback}.)
+
+% The following needs some more work, yet.
+%\raggedbottom
+%\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+%\footnotesize An example of the use of jthread.
+%\tcblower
+%\cppfile{code_examples/cpp23/jthread6.cpp}
+%\end{codebox}
 
 %\subsection{Tasks}
 
 \subsection{Coroutines}
 
-In C++23 and subsequent versions, we hope to see some standard syntax for defining coroutines (cf. P2502). 
+In C++23 and subsequent versions, we hope to see some standard syntax for defining coroutines (cf. P2502), such as:
 
 \raggedbottom
 \begin{codebox}[]{}
@@ -171,7 +182,21 @@ Eventually, in C++23 and C++23, the support for message-passing architectures ba
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An example of the use of coroutines.
+\footnotesize An example of the use of coroutines in message-passing architectures (1/3).
+\tcblower
+\cppfile{code_examples/cpp23/coroutines5a.h}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of coroutines in message-passing architectures (2/3)
+\tcblower
+\cppfile{code_examples/cpp23/coroutines5b.h}
+\end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of coroutines in message-passing architectures (3/3)
 \tcblower
 \cppfile{code_examples/cpp23/coroutines5.cpp}
 \end{codebox}

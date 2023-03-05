@@ -111,9 +111,9 @@ All guarantee atomicity and modification-order consistency.
 
 In \cpp{memory_order_relaxed}, no further guarantees are provided and specifically no order is imposed on concurrent memory accesses. This is also how weakly-ordered architectures (e.g. ARM) operate, by default: if two threads access shared memory the load in one thread does not have to read a value written by another thread very recently.
 
-With \cpp{memory_order_release} and memory_order_acquire specifiers, we force  weakly-ordered achitectures to behave closer to strongly-ordered architectures (e.g., Intel). If one thread writes into shared memory atomically with \cpp{memory_order_release} and another thread reads the memory atomically with memory_order_acquire, the load in the second thread is guaranteed to read the value written by another thread. 
+With \cpp{memory_order_release} and \cpp{memory_order_acquire} specifiers, we force  weakly-ordered achitectures to behave closer to strongly-ordered architectures (e.g., Intel). If one thread writes into shared memory atomically with \cpp{memory_order_release} and another thread reads the memory atomically with \cpp{memory_order_acquire}, the load in the second thread is guaranteed to read the value written by another thread. 
 
-(In earlier version of C++ standard, there were further memory models defined for the sake of DEC Alpha architecture. At least memory_order_consume is deprecated as of C++17.) 
+(In earlier version of C++ standard, there were further memory models defined for the sake of DEC Alpha architecture. At least \cpp{memory_order_consume} is deprecated as of C++17.) 
 
 With \cpp{memory_order_seq_cst}, we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent \cpp{memory_order_seq_cst store}. This is the default option. 
 
