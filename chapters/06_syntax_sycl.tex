@@ -1,18 +1,21 @@
 \chapter{The Syntax in SYCL}
 
+SYCL is an open specification for the design of code targeting either CPUs or GPGPUs. 
+The current version is SYCL 2020, released in 2021. 
+If you want to learn more about SYCL, see 
+\url{https://github.com/codeplaysoftware/syclacademy} for an extensive tutorial.
+
+
 \section{More concepts}
 
-SYCL is an open specification for the design of code targeting either CPUs or GPGPUs. 
-There are many implementations of the SYCL specification (incl. hipSYCL, Intel DPC++, CodePlay ComputeCPP)
-with minor differences. 
 To make as efficient use of GPGPUs as possible, SYCL utilizes a number of concepts that 
 we have not seen earlier.
 
 \subsection{Device selector}
 
+Selectors are used to pick device to run on.
 In header \cpp{<device_selector.h>}, there is an abstract class \cpp{device_selector} with numerous implementations
-such as \cpp{gpu_selector} and \cpp{host_selector} and \cpp{opencl_selector}.
-\cpp{default_selector} 
+such as \cpp{gpu_selector}, \cpp{host_selector}, \cpp{opencl_selector}, and \cpp{default_selector}.
 
 One can also implement its own subclasses that specify to the runtime how to perform device selection.
 For example, it may query the amount of memory on the GPGPU and if it is sufficient, 
@@ -44,22 +47,36 @@ We can also declare the queue to be in-order, similar to sorted in OpenMP:
  \subsection{Work items, Work groups, and Kernels}
 
 Within an action submitted to the queue, we execute kernels.
- Kernels are \cpp{void} functions, which cannot allocate memory dynamically, and use certain other features (RTTI). 
-
+ Kernels are callables 
+ \begin{itemize}
+ \item receiving an index to the run of the kernel as \cpp{auto idx} or \cpp{id<1> idx} or similar.
+ \item returning nothing; with \cpp{void} return type 
+ \item which cannot allocate memory dynamically
+ \itme which cannot use certain other features (e.g., RTTI). 
+\end{itemize}
 Within the \cpp{single_task function} method of the ``command group handler'' API, 
 we pass a C++ function object as a parameter and have it executed once. 
-Kernel can also be a class that overloads \cpp{operator()}.
-Either way, the call is passed an index to the run of the kernel as \cpp{id<1> idx} or \cpp{auto idx}, e.g. \cpp{void operator()(id<1> idx)}.
+Kernel can also be a class that overloads operator (), e.g. \cpp{void operator()(id<1> idx)}.
 
-More often, we want the kernel executed many times, in a data-parallel fashion. 
-In the so-called ND-ranges, we partition the index-set of a data set hierarchically first into into global ranges, and then into local ranges. 
+Most often, we want the kernel executed many times, in a data-parallel fashion. 
+In the so-called nd-ranges, we partition the index-set of a data set hierarchically first into into global ranges, and then into local ranges. 
 The local range corresponds to a work-group and each element corresponds to a work item (= single run of a kernel). 
-Work-groups are independent of each other there is no way to synchronize write access between two work items in two distinct work groups in a single kernel. 
-On the other hand the work-group local memory can often be accessed very efficiently, via \cpp{local_accessor }, and can be used to coordinate multiple work items (= single runs) within a work group.
+Typically, all work items within a work group are executed in lock step (i.e., the same hardware instruction in all work items at the same time).
+The work-group local memory can often be accessed very efficiently, via \cpp{local_accessor }, and can be used to coordinate multiple work items (= single runs) within a work group.
+%On the other hand, work-groups are independent of each other there is no way to synchronize write access between two work items in two distinct work groups in a single kernel. 
+
+To summarize, each work item can access:
+\begin{itemize}
+\item private memory
+\item work-group local memory
+\item global memory accessible to all work items within an nd-range, but whose access can be very expensive, as it involves copying data across PCIe bus
+\item constant memory, which is a part of the global memory, but which can be very cheap to access. 
+\end{itemize}
 
 \subsection{Asynchronous errors}
 
-Asynchronous errors are produced by a command group or a kernel. By default, they are not propagated to the host. One can, however, defined and error handler and pass it to a queue \cpp{queue q(default_selector{}, exception_handler);}.
+The SYCL implementation may throw ``synchronous errors'' (one at a time).
+In contrast, asynchronous errors are produced by a command group or a kernel (with many kernels running at any point). By default, asynchronous errors are not propagated to the host. One can, however, defined and error handler and pass it to a queue \cpp{queue q(default_selector{}, exception_handler);}.
 The error handler receives an \cpp{exception_list}, wherein one can iterate over \cpp{std::exception_ptr}.
 
 See \url{https://www.codingame.com/playgrounds/48226/introduction-to-sycl/error-handling} for a great tutorial with code that is editable, compilable, and runnable online. Let us simplify their main example somewhat:
@@ -148,7 +165,15 @@ Next, let us consider an example that uses work groups and local memory in an at
          
 \subsection{Building code}
 
-To build code with SYCL, you need to link with the appropriate libraries, which depends on what is your target. 
+Compiling code with SYCL should require passing ``-fsycl'' to a compiler that supports the SYCL 2020 specification, 
+but it often turns out to be substantially more complicated than with standard C++23 or OpenMP.
+
+There are many implementations of the SYCL specification (incl. OpenSYCL, Intel DPC++, CodePlay ComputeCPP)
+with minor differences. 
+One way of getting around the complexity is to install the OpenSYCL compiler:
+\url{https://github.com/OpenSYCL/OpenSYCL} (formerly known as hipSYCL).  
+
+Independent of the compiler, to build code with SYCL that targets a GPGPU, you need to link with the appropriate libraries, which depends on what is your target. 
 If you target, e.g., common OpenCL variants: 
 
 \begin{verbatim}

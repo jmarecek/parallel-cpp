@@ -10,7 +10,7 @@ void work() {
 }
 
 int main() {
-#pragma omp parallel shared(5)
+#pragma omp parallel num_threads(5)
     work();
 }
 

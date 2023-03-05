@@ -1,6 +1,3 @@
-#include <iostream>
-#include <syncstream>
-#include <thread>
 #include "omp.h"
 
 int work() {
@@ -10,5 +7,5 @@ int work() {
 int main() {
     int sum = 0; 
 #pragma omp parallel for reduction(+:sum)
-	for (int i = 0; i < nbodies; i++) sum += work();
+    for (int i = 0; i < 42; i++) sum += work();
 }

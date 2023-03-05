@@ -2,7 +2,7 @@
 
 \section{Threads, Tasks, Coroutines}
 
-\subsection{C++11 Threads}
+\subsection{C++11 thread}
 
 C++11 had a very basic support for threads, in terms of \cpp{std::thread} of header \cpp{thread}. The thread starts running once the constructor is called. The object is not CopyConstructible nor CopyAssignable. 
 The challenge in C++11 threads is that one needs to call \cpp{join} or \cpp{detach} prior to the destructor being called. If neither was called, the program was \cpp{std::abort}ed. 
@@ -25,7 +25,7 @@ The use of the C++11 \cpp{thread} is thus considered harmful and we will present
 \cppfile{code_examples/cpp23/thread2.cpp}
 \end{codebox}
 
-\subsection{C++20 JThreads}
+\subsection{C++20 jthread}
 
 C++20 adds a new class \cpp{jthread} (``joining threads''), which does not require a call to \cpp{join} or \cpp{detach}. Instead, the destructor waits for completion of the code (``joins'') automatically. 
 

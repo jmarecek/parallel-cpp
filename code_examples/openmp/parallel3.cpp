@@ -1,3 +1,6 @@
+// Based on parallel.1.c in standard OpenMP Examples 5.1
+// https://www.openmp.org/wp-content/uploads/openmp-examples-5.1.pdf
+
 #include <omp.h>
 
 void subdomain(float *x, int istart, int ipoints) {

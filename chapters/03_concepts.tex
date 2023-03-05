@@ -1,4 +1,5 @@
 \chapter{The Concepts}
+\label{ch:concepts}
 
 Parallelism means two or more tasks can be executed simultaneously. This is an option, which the compiler and operating system and processor can exercise, but does not come with any guarantees. 
 Often, this means no shared variables or other resources, and need not require any synchronization primitives.
@@ -148,6 +149,8 @@ All four ARM instructions utilize only two registers, compared to three register
 In C++, the \emph{only} synchronization primitive that is guaranteed to be hardware implemented is a particular atomic boolean type, which is known as \cpp{std::atomic_flag}. Unlike all specializations of \cpp{std::atomic}, it is guaranteed to be lock-free. Prior to C++20, it has been very restricted, because there was no way to check the value of \cpp{std::atomic_flag} without setting it. C++20 adds method \cpp{test()}. 
 
 %\subsection{Fetch and add}
+
+% GPGPU hardware: stream multiprocessor (SM)
 
 \section{Synchronization primitives}
 

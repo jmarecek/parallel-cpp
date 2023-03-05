@@ -1,19 +1,41 @@
 \chapter{The Syntax in OpenMP}
 
-OpenMP is a specification for concurrency in Fortran, C, and C++. Prime implementations include IOMP for ICC/Clang and GOMP for GCC.
+OpenMP is a specification for concurrency (parallel programming of shared memory systems) in Fortran, C, and C++. 
+The current version of the specification can be downloaded from \url{https://www.openmp.org/wp-content/uploads/OpenMP-API-Specification-5-2.pdf}.
 
+The specification is built on top of the fork-join model of parallel execution (sériově-paralelní model uspořádání vláken),
+but generally does not provide any guarantees as to how a particular directive or function is implemented. 
+This also means that running on a different hardware may result in different order of execution of floating-point operations or similar.  
+Prime implementations include 
+\begin{itemize}
+\item libgomp (GOMP) for GCC, 
+\item libomp for clang, and 
+\item liomp5 (IOMP) for ICC/Clang.
+\end{itemize} 
+There are no guarantees that the output or performance will stay the same across multiple implementations. 
+
+OpenMP combines preprocessor directives (pragmas) and a library of functions exported via \cpp{omp.h}.
+Ideally one and the same program written with OpenMP should be possible to run as serial code, or with any number of threads. 
+Many OpenMP programs use only the preprocessor directives, which makes it possible to compile them even as serial code even without OpenMP-aware compiler. 
+
+There is a long history of the evolution of OpenMP since 1997, from a 50-page long specification of OpenMP 1.0, through 150-page version 3.0 (introducing ``tasks'') and 250-page version 4.0 (adding GPGPU support), to much longer versions recently. 
 Traditional implementations of OpenMP have been rather closely built on top of Pthreads, 
 which results in the lack of fine-grained scheduling, 
 memory management, network management, signaling, etc.
 The lack of fine-grained scheduling notably means the lack of user-level threads (co-routines)
 and the lack of queries as to the number of hardware threads utilized by other processes, 
 which often results in high overhead when the number of threads (across all processes!) increases above the number of hardware threads supported.
-
 Since OpenMP 5.0, the distinction between threads and tasks has been erased and thread teams are also cast into tasks. There are now also OpenMP implementations over lightweight threads, notably (BOLT is OpenMP over Lightweight Threads, https://www.bolt-omp.org/). 
 
-\section{Threads, Tasks, Coroutines}
+\section{Threads, Tasks, Coroutines}  
 
-\subsection{OpenMP Threads}
+\subsection{OpenMP Task Region}
+
+Initially, OpenMP application starts with a single thread (initial/master thread). This can spawn parallel regions, typically with multiple threads in a thread pool (``thread team'') in the fork-join manner. 
+This means that in any thread, one can either wait for all the ``sibling'' threads to finish (``join them'') or spawn a further, nested parallel region.
+
+A key construct in OpenMP is thus \cpp{#pragma omp parallel}, which delineates a parallel region and opens a ``team of OpenMP threads'', which could be seen as a thread pool of threads or user-level threads. 
+By default, the number of threads is set based on the available hardware threads, but this can be affected by the environment variables (\cpp{OMP_NUM_THREADS}) and modifiers of the pragma (\cpp{num_threads(2)}) and function calls (\cpp{omp_set_num_threads()}). 
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -22,12 +44,35 @@ Since OpenMP 5.0, the distinction between threads and tasks has been erased and 
 \cppfile{code_examples/openmp/parallel1.cpp}
 \end{codebox}
 
+The construct can take a number of modifiers, including:
+\begin{itemize}
+\item num_threads: number of threads to use in the team
+\item private(list of variables): those variables will be private to each thread 
+\item firstprivate(list of variables): those variables will be private to each thread, but initially will copy a value from the master thread using the default copy constructor. 
+\item shared(list of variables): these variables will be shared between the master thread and all threads in the new team. It is the programmers responsibility to keep the variables constructed as long as the parallel region is running
+\item default: values of \cpp{private}, \cpp{firstprivate}, \cpp{shared}, \cpp{none} suggest what should be the default behaviour for variables not listed above. The default is \cpp{shared}, which is suboptimal from both performance and thread-safety perspective. It is wise to issue \cpp{default(none)}. 
+\item reduction(reduction-identifier : list) suggests that variables in list should be treated as shared, when they are used by the function \cpp{reduction-identifier}, which could also take the special values of +, -, *, \&, |, ^, ||, max, min. The list can include array elements and, when \cpp{reduction-identifier} is a static function of a class, accessible data objects of the object. \label{sec:reduction1}
+\item proc_bind: values of \cpp{master} and \cpp{close} and \cpp{spread} suggest how far from the master thread should be executed the new threads (same code, close in non-uniform architectures, as far as possible in non-uniform architectures) 
+%\item allocate([allocator :] list)
+\end{itemize}
+
+Whether the nested parallel regions create their own thread teams or use the existing thread teams depends on   
+settings that we can affect through \cpp{omp_set_nested}, or environment variables \cpp{OMP_NESTED} (which can be true or false) and \cpp{OMP_MAX_ACTIVE_LEVELS}, which controls the maximum number of nested active parallel regions.
+See, for example:
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP parallel regions.
 \tcblower
 \cppfile{code_examples/openmp/parallel2.cpp}
 \end{codebox}
+
+Since version 5.0, one can also utilize the \cpp{teams} construct on its own, optionally with a target (such a GPGPU). 
+
+\subsection{Threads}
+
+As has been mentioned above, ideally one and the same program written with OpenMP should be possible to run as serial code, or with any number of threads. 
+This requires sizing the work in each thread depending on the number of threads, such as in:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -37,6 +82,12 @@ Since OpenMP 5.0, the distinction between threads and tasks has been erased and 
 \end{codebox}
 
 \subsection{Sections}
+
+An alternative, non-iterative structuring of the code is possible with sections.
+Each section is a block of code executed by one thread of the current thread team (corresponding to the innermost enclosing parallel region). 
+One can use private, firstprivate, lastprivate, and reduction modifiers, similar to the parallel construct. 
+There is an implied barrier of the sections region, unless eliminated by a nowait clause.
+See, for example:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -63,9 +114,27 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 \cppfile{code_examples/openmp/task1.cpp}
 \end{codebox}
 
+\subsection{Kernels}
+
+There is a nascent support for the use of GPGPUs via \cpp{target} construct.
+While the block following the target construct can be arbitrary, in principle, most GPUs are not able to support arbitrary code. Specifically, there are usually no synchronization primitives available and no coherence between L1 caches. Often, block requiring anything beyond the basic arithmetics will execute only on one core (``stream multiprocessor'') of the GPGPU. Ideally, one should combine the offloading of the code to the GPGU (via the target), across multiple cores (via teams construct), and then across the code. This can get quite non-trivial:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of OpenMP targets and teams.
+\tcblower
+\cppfile{code_examples/openmp/task1.cpp}
+\end{codebox}
+
+We refer to:
+\url{https://www.archer.ac.uk/training/course-material/2019/06/AdvOpenMP-manch/L10-OpenMPTargetOffload.pdf}
+from which we took this example for an excellent introduction.
+
 \section{Synchronisation Primitives}
 
 \subsection{Barrier}
+
+OpenMP provides a straightforward, explicit barrier construct:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -74,14 +143,30 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 \cppfile{code_examples/openmp/barrier1.cpp}
 \end{codebox}
 
+Especially with nested parallel regions, the behaviour can be quite non-trivial.
+All threads of the current team must complete execution of all tasks bound to the same parallel region prior to continuing past the barrier. What is the current team, however, e.g., whether it is created by the innermost enclosing parallel region,
+depends on the settings of the nesting:
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An example of the use of a barrier.
+\footnotesize An example of the use of a barrier, whose study is left as an exercise.
 \tcblower
 \cppfile{code_examples/openmp/barrier2.cpp}
 \end{codebox}
 
+Barrier is also implied by the entry and exit in parallel regions.
+
+\subsection{Fences and Flushes}
+
+Close to a memory fence, the \cpp{flush} construct provides point at which a thread is guaranteed to
+have a consistent view of memory, similar to a fence. 
+
+The \cpp{flush} is also implied by the entry and exit in parallel regions, critical regions, operations with locks etc. 
+
 \subsection{Atomic Variables}
+
+OpenMP has a rich support for atomic variables. 
+At the simplest one may consider:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -90,7 +175,18 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 \cppfile{code_examples/openmp/atomic1.cpp}
 \end{codebox}
 
+More broadly, one can specify:
+\begin{itemize}
+\item operations for which the atomicity is enforced, out of \cpp{read},  \cpp{write}, \cpp{update}, \cpp{capture}, out of which update is the default. Capture makes it possible to use operators such as \cpp{+=}, e.g., \cpp{{v = x; x binop= expr;} }.
+\item memory order, out of \cpp{seq_cst}, \cpp{acq_rel}, \cpp{release},  \cpp{acquire},  \cpp{relaxed} as discussed in Chapter \ref{ch:concepts}. The default is relaxed-consistency shared memory model.
+\end{itemize}
+
+E.g. \cpp{#pragma omp atomic write} or \cpp{#pragma omp atomic seq_cst}.
+Note that you need to use \cpp{{}} to create a new block, wherein the operations would be atomic, if you wish to consider some sequence of read and write operations. 
+
 \subsection{Reductions}
+
+As we have briefly mentioned on page \pageref{sec:reduction1}, one may consider a reduction, which produces a single value from an associative operations such as addition, multiplication, taking of the minimum, maximum, or custom associative functions. The goal is for each thread to run the reduction with a private copy and then to produce the final result with the same reduction, perhaps in a hierarchical fashion. A simplistic blueprint is provided in the following example:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -101,12 +197,15 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 
 \subsection{Mutexes}
 
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An example of the use of OpenMP mutexes.
-\tcblower
-\cppfile{code_examples/openmp/mutex1.cpp}
-\end{codebox}
+OpenMP has only a limited support for mutexes, as in does not support any RAII variant, 
+which makes them hard to use correctly. One can, however, construct one own's RAII variant:
+
+%\raggedbottom
+%\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+%\footnotesize An example of the use of OpenMP mutexes.
+%\tcblower
+%\cppfile{code_examples/openmp/mutex1.cpp}
+%\end{codebox}
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -117,6 +216,12 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 
 \subsection{Critical Sections}
 
+Instead of mutexes, one can safely use critical sections in OpenMP. 
+A critical section is a block of code which can be executed by at most 
+one thread at one time.
+This can be used to protect non-trivial non-associative update operations, 
+for which we cannot use reductions: 
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of a critical section.
@@ -124,10 +229,15 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 \cppfile{code_examples/openmp/critical1.cpp}
 \end{codebox}
 
+The use of critical sections does come with a substantial penalty in terms of performance, though. 
 
-\section{Algorithms in the Standard Template Library}
+\section{Algorithms}
+
+While OpenMP does not really implement any algorithms, some of the data-parallel constructs are similar to algorithms in the STL library. Notably:
 
 \subsection{For Each}
+
+OpenMP makes it possible to use ``for each'':
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -143,7 +253,6 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 \cppfile{code_examples/openmp/for_each2.cpp}
 \end{codebox}
 
-\subsection{Reduce}
-
-\subsection{Merge}
+%\subsection{Reduce}
+%\subsection{Merge}
 

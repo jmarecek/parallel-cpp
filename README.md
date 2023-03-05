@@ -24,4 +24,4 @@ The `verify.sh` shell script will build all (except for a few that don't compile
 
 ### Lecture notes
 
-To build the PDF of the lecture notes, issue `pdflatex --shell-escape book`. 
+To build the PDF of the lecture notes, issue `pdflatex -interaction nonstopmode --shell-escape -output-directory="build" book`. 
