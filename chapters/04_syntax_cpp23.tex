@@ -284,6 +284,8 @@ A slightly more verbose example considers:
 
 \section{Algorithms in the Standard Template Library}
 
+Since C++17, there is an excellent Parallel Standard Template Library in header \cpp{<algorithm>}.
+
 \subsection{For Each}
 \label{sec:foreachcpp23}
 
@@ -300,6 +302,8 @@ As in the serial version of STL, the callable within for each is permitted to ch
 
 \subsection{Reduce}
 
+Similarly useful is the reduce operation (also known as fold, accumulate, aggregate, compress, or inject). Indeed, a whole approach to parallel programming (Map Reduce) is named after the algorithm. There, one applies an associative operation to each piece of data to obtain a partial result, and then (perhaps using a binary-tree reduction, which also may enforce an order which may or may not be desirable) obtains the final result by applying the same associative operation to the partial results. The binary-tree reduction makes it possible to utilize $O(\log(n))$ rounds of computation on $n$ processors. 
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of reduce.
@@ -308,6 +312,8 @@ As in the serial version of STL, the callable within for each is permitted to ch
 \end{codebox}
 
 \subsection{Merge}
+
+Finally, in implementing parallel sorting algorithms, we will utilize the parallel merge operation:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
