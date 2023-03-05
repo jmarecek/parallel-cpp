@@ -8,9 +8,7 @@ This repository contains the LaTeX source and C++ code samples for lecture notes
 
 ## Building from sources
 
-The repository is configured with VSCode devcontainer support.
-
-Make sure that you have VSCode and Docker installed, then simply open the repository in VSCode. You will be prompted to reopen the project in a docker image.
+The repository is configured with VSCode devcontainer support. (This support comes largely from Simon Toth! Cheers!)  Make sure that you have VSCode and Docker installed, then simply open the repository in VSCode. You will be prompted to reopen the project in a docker image.
 
 VSCode is configured to use the LaTeX Workshop extension. To build the PDF simply press `CTRL+ALT+B` or select `LaTeX Workshop: Build LaTeX Project` from the command palette.
 Note that due to the high number of code examples, the build does take a while.
