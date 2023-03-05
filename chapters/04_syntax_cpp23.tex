@@ -135,7 +135,7 @@ The promise class is instantiated for each instance of the coroutine, and its me
 
 \raggedbottom
 \begin{codebox}[]{}
-\footnotesize An schema of the coroutine, in terms of its calls of the methods of the promise class.
+\footnotesize A schema of the coroutine, in terms of its calls of the methods of the promise class.
 \tcblower
 \cppfile{code_examples/cpp23/coroutines_schema.h}
 \end{codebox}
@@ -178,7 +178,7 @@ By defining \cpp{await_transform()} in the promise type, the compiler will use \
 \cppfile{code_examples/cpp23/coroutines4.cpp}
 \end{codebox}
 
-Eventually, in C++23 and C++23, the support for message-passing architectures based on \url{https://github.com/lewissbaker/cppcoro} should be available. For a small sample, see a custom implementation here:
+Eventually, in C++23 and C++26, the support for message-passing architectures based on \url{https://github.com/lewissbaker/cppcoro} should be available. For a small sample, see a custom implementation here:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -201,7 +201,7 @@ Eventually, in C++23 and C++23, the support for message-passing architectures ba
 \cppfile{code_examples/cpp23/coroutines5.cpp}
 \end{codebox}
 
-For more nice examples, see Boost Asio, e.g.,
+For further nice examples, see also Boost Asio, e.g.,
 \url{https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/example/cpp20/channels/throttling_proxy.cpp}, 
 as discussed, e.g., at
 \url{https://www.youtube.com/watch?app=desktop&v=ZNttI_WswMU&ab_channel=ACCUConference}.
@@ -212,12 +212,16 @@ For the technical specification, see \url{https://github.com/GorNishanov/corouti
 
 \subsection{Barrier}
 
+Since C++20, there is support for barriers in header \cpp{<barrier>}. The constructor takes an integer value, which is the number of threads that the barrier is expected to block. The key methods are \cpp{arrive_and_wait()} and \cpp{arrive_and_drop()}. The former functions as one would expect. The latter decrements the initial expected count for all uses by one, as if one thread could never reach the barrier subsequently. This can be very useful in error management:
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of a barrier.
 \tcblower
 \cppfile{code_examples/cpp23/barrier1.cpp}
 \end{codebox}
+
+More complicated uses of barriers may use the template parameter \cpp{CompletionFunction} and have a callable executed whenever the barrier is hit (reaches zero):
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -227,7 +231,10 @@ For the technical specification, see \url{https://github.com/GorNishanov/corouti
 \end{codebox}
 
 \subsection{Atomic Variables}
+\label{sec:atomiccpp23}
 
+Since C++11, there is an excellent support for atomic variables in header \cpp{<atomic>}. 
+The primary template can be instantiated with types that are TriviallyCopyable, CopyConstructible, and CopyAssignable.
 First, let us consider two simple examples:
 
 \raggedbottom
@@ -248,19 +255,16 @@ Finally, let us consider two, more complete examples of a stack:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An elaborate example of the use of atomic variables.
+\footnotesize A stack implemented using atomic variables.
 \tcblower
 \cppfile{code_examples/cpp23/atomic5.cpp}
 \end{codebox}
 
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An elaborate example of the use of atomic variables.
-\tcblower
-\cppfile{code_examples/cpp23/atomic6.h}
-\end{codebox}
+We will elaborate upon this later in Chapter \ref{ch:datastructures}. 
 
 \subsection{Mutexes}
+
+A good practice for the use of mutexes is to lock them via the RAII idiom. Since C++11, this is available as \cpp{std::unique_lock} in header \cpp{<mutex>}:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -268,6 +272,8 @@ Finally, let us consider two, more complete examples of a stack:
 \tcblower
 \cppfile{code_examples/cpp23/mutex1.cpp}
 \end{codebox}
+
+A slightly more verbose example considers:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -279,13 +285,9 @@ Finally, let us consider two, more complete examples of a stack:
 \section{Algorithms in the Standard Template Library}
 
 \subsection{For Each}
+\label{sec:foreachcpp23}
 
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An example of the use of for each.
-\tcblower
-\cppfile{code_examples/cpp23/for_each_code_cpp20.h}
-\end{codebox}
+The most useful algorithm from the Standard Template Library (STL) in terms of parallel programming is surely for each:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
@@ -293,6 +295,8 @@ Finally, let us consider two, more complete examples of a stack:
 \tcblower
 \cppfile{code_examples/cpp23/for_each_code_parallel.h}
 \end{codebox}
+
+As in the serial version of STL, the callable within for each is permitted to change the state of elements, if the underlying range is mutable, but cannot invalidate iterators.
 
 \subsection{Reduce}
 
