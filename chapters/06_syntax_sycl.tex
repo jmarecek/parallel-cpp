@@ -29,7 +29,7 @@ but one can create further queues for the same device.
 A key method is \cpp{queue.submit},
 which passes a ``command group'' for asynchronous execution. 
 
-A command group is, essentially, composed of a set of requirements and an actual kernel. 
+A command group is, essentially, composed of a set of requirements and actual commands executing a kernel. 
 The kernel then receives a ``command group handler'' from the SYCL as its argument,
 and uses it to access the API. 
 A command group submission to the group is atomic.  
@@ -48,9 +48,14 @@ Within an action submitted to the queue, we execute kernels.
 
 Within the \cpp{single_task function} method of the ``command group handler'' API, 
 we pass a C++ function object as a parameter and have it executed once. 
+Kernel can also be a class that overloads \cpp{operator()}.
+Either way, the call is passed an index to the run of the kernel as \cpp{id<1> idx} or \cpp{auto idx}, e.g. \cpp{void operator()(id<1> idx)}.
 
-Within the particular kernel, we may have multiple work-items grouped into work-groups. 
+More often, we want the kernel executed many times, in a data-parallel fashion. 
+In the so-called ND-ranges, we partition the index-set of a data set hierarchically first into into global ranges, and then into local ranges. 
+The local range corresponds to a work-group and each element corresponds to a work item (= single run of a kernel). 
 Work-groups are independent of each other there is no way to synchronize write access between two work items in two distinct work groups in a single kernel. 
+On the other hand the work-group local memory can often be accessed very efficiently, via \cpp{local_accessor }, and can be used to coordinate multiple work items (= single runs) within a work group.
 
 \subsection{Asynchronous errors}
 
@@ -104,7 +109,7 @@ In the case of one-dimensional arrays, one can call the constructor with an inte
 Once in a kernel, an \cpp{accessor} specifies constraints on the use of a buffer therein. 
 Two key choices are:
 \begin{itemize}
-\item access mode: \cpp{read}, \cpp{write}, and \cpp{read_write} 
+\item access mode: \cpp{read}, \cpp{write}, and \cpp{read_write}, where write access mode also implicitly defines dependencies between tasks
 \item access target: \cpp{global_memory} suggests that the data resides in the global memory space of the device. Other options are device specific. \cpp{no_init} suggests that the initial data can be discarded (not moved to the device). 
 \end{itemize}
 
@@ -121,14 +126,24 @@ See the example below:
 Depending on the details of the use of a barrier, one may wish to use \cpp{sycl::queue::wait()} and \cpp{sycl::queue::wait_and_throw()}, or \cpp{item::barrier(access::fence_space)} within a kernel.
 
 
-\subsection{A more complex example}
+\subsection{More complex examples}
 
-See the example below:
+First, let us consider a complete, working example:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of vector addition in SYCL.
+\tcblower
+\cppfile{code_examples/sycl/buffer3.cpp}
+\end{codebox}
+
+Next, let us consider an example that uses work groups and local memory in an attempt to utilize more of the performance available in the GPGPU. 
+
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
 \footnotesize An example of the use of work groups and local memory.
 \tcblower
-\cppfile{code_examples/sycl/buffer4.h}
+\cppfile{code_examples/sycl/buffer4.cpp}
 \end{codebox}
          
 \subsection{Building code}
