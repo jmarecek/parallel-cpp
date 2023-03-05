@@ -1,4 +1,163 @@
 \chapter{The Syntax in SYCL}
 
+\section{More concepts}
+
+SYCL is an open specification for the design of code targeting either CPUs or GPGPUs. 
+There are many implementations of the SYCL specification (incl. hipSYCL, Intel DPC++, CodePlay ComputeCPP)
+with minor differences. 
+To make as efficient use of GPGPUs as possible, SYCL utilizes a number of concepts that 
+we have not seen earlier.
+
+\subsection{Device selector}
+
+In header \cpp{<device_selector.h>}, there is an abstract class \cpp{device_selector} with numerous implementations
+such as \cpp{gpu_selector} and \cpp{host_selector} and \cpp{opencl_selector}.
+\cpp{default_selector} 
+
+One can also implement its own subclasses that specify to the runtime how to perform device selection.
+For example, it may query the amount of memory on the GPGPU and if it is sufficient, 
+use GPGPU. If it were not sufficient, it could use CPU as a fallback. 
+There, one overrides \cpp{int operator()(const sycl::device& dev) const override}
+and returns an integer for the priority. The higher integer, the higher priority. 
+
+\subsection{Queues}
+
+A queue, \cpp{queue}, is an abstraction of a device,
+through which we orchestrate work on the device.
+In a constructor of a queue, we pass the device, which cannot be changed later,
+but one can create further queues for the same device.
+A key method is \cpp{queue.submit},
+which passes a ``command group'' for asynchronous execution. 
+
+A command group is, essentially, composed of a set of requirements and an actual kernel. 
+The kernel then receives a ``command group handler'' from the SYCL as its argument,
+and uses it to access the API. 
+A command group submission to the group is atomic.  
+
+Asynchronous execution also means an undefined order of execution, 
+unless we use \cpp{wait} or suggest the dependencies between the ``actions'' in the form of a task graph.
+We can also declare the queue to be in-order, similar to sorted in OpenMP:
+\cpp{queue q{property::queue::in_order()};}.
+
+%To specify the task graph, one can use events, e.g., 
+
+ \subsection{Work items, Work groups, and Kernels}
+
+Within an action submitted to the queue, we execute kernels.
+ Kernels are \cpp{void} functions, which cannot allocate memory dynamically, and use certain other features (RTTI). 
+
+Within the \cpp{single_task function} method of the ``command group handler'' API, 
+we pass a C++ function object as a parameter and have it executed once. 
+
+Within the particular kernel, we may have multiple work-items grouped into work-groups. 
+Work-groups are independent of each other there is no way to synchronize write access between two work items in two distinct work groups in a single kernel. 
+
+\subsection{Asynchronous errors}
+
+Asynchronous errors are produced by a command group or a kernel. By default, they are not propagated to the host. One can, however, defined and error handler and pass it to a queue \cpp{queue q(default_selector{}, exception_handler);}.
+The error handler receives an \cpp{exception_list}, wherein one can iterate over \cpp{std::exception_ptr}.
+
+See \url{https://www.codingame.com/playgrounds/48226/introduction-to-sycl/error-handling} for a great tutorial with code that is editable, compilable, and runnable online. Let us simplify their main example somewhat:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize Error handling in SYCL.
+\tcblower
+\cppfile{code_examples/sycl/exception1.cpp}
+\end{codebox}
+  
+\subsection{Unified shared memory}
+ 
+At the cost of some latency, one can use a unified shared memory across both the host and the device, wherein oneuses the same pointer on both the host and the device. This requires:
+ 
+\cpp{
+template <typename T>
+T* malloc_shared(size_t count,
+                 const queue& syclQueue,
+                 const property_list &propList = {})
+}
+
+and the corresponding 
+
+\cpp{void free(void* ptr, sycl::queue& syclQueue)}
+
+See the example below:
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of unified shared memory.
+\tcblower
+\cppfile{code_examples/sycl/buffer2.h}
+\end{codebox}
+ 
+\subsection{Buffers and accessors}
+
+A buffer is a constrained view of a 1-, 2-, or 3-dimensional array.
+The constraints specify how it can be accessed on the host, the device or both. 
+A buffer is constructed with a pre-allocated, trivially copyable C++ objects (e.g., STL container). 
+Within the contract for the use of the buffer, 
+one promises not to amend the memory used to initialise the buffer during the lifetime of the buffer. 
+Buffer promises to update the memory in the host upon destruction, in RAII spirit. 
+
+In the case of one-dimensional arrays, one can call the constructor with an interator:
+\cpp{template <typename InputIterator> buffer(InputIterator first, InputIterator last, const property_list &propList={});}
+
+Once in a kernel, an \cpp{accessor} specifies constraints on the use of a buffer therein. 
+Two key choices are:
+\begin{itemize}
+\item access mode: \cpp{read}, \cpp{write}, and \cpp{read_write} 
+\item access target: \cpp{global_memory} suggests that the data resides in the global memory space of the device. Other options are device specific. \cpp{no_init} suggests that the initial data can be discarded (not moved to the device). 
+\end{itemize}
+
+See the example below:
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of buffers and accessors.
+\tcblower
+\cppfile{code_examples/sycl/buffer1.h}
+\end{codebox}
+
+\subsection{Barrier}
+
+Depending on the details of the use of a barrier, one may wish to use \cpp{sycl::queue::wait()} and \cpp{sycl::queue::wait_and_throw()}, or \cpp{item::barrier(access::fence_space)} within a kernel.
 
 
+\subsection{A more complex example}
+
+See the example below:
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\footnotesize An example of the use of work groups and local memory.
+\tcblower
+\cppfile{code_examples/sycl/buffer4.h}
+\end{codebox}
+         
+\subsection{Building code}
+
+To build code with SYCL, you need to link with the appropriate libraries, which depends on what is your target. 
+If you target, e.g., common OpenCL variants: 
+
+\begin{verbatim}
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fsycl -std=c++17")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lOpenCL -lsycl")
+\end{verbatim}
+
+If you target MKL:
+
+\begin{verbatim}
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fsycl -std=c++17")
+set(CMAKE_EXE_LINKER_FLAGS " -fsycl -lmkl_sycl -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core")
+\end{verbatim}
+
+If you target CUDA (or NVIDIA OpenCL), you may need to set up paths to CUDA, in addition to the use of:
+
+\begin{verbatim}
+-fsycl -fsycl-targets=nvptx64-nvidia-cuda
+\end{verbatim}
+
+Similarly for AMD:
+
+\begin{verbatim}
+-fsycl -fsycl-targets=amdgcn-amd-amdhsa -Xsycl-target-backend –offload-arch=gfx906
+\end{verbatim}
+
+For details of the use of SYCL with CUDA, see \url{https://github.com/codeplaysoftware/SYCL-For-CUDA-Examples}
