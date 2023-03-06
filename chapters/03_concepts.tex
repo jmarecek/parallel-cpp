@@ -49,15 +49,6 @@ Naively, one could run:
 \cppfile{code_examples/cpp23/lock.h}
 \end{codebox}
 
-Better, one could consider:
-
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize Locking multiple mutexes at once.
-\tcblower
-\cppfile{code_examples/cpp23/scoped_lock.h}
-\end{codebox}
-
 In theory, a deadlock (Czech: ``problém uváznutí'') can occur when:
 \begin{itemize}
 \item each lock is owned by at most one thread

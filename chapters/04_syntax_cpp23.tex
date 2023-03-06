@@ -262,22 +262,34 @@ Finally, let us consider two, more complete examples of a stack:
 
 We will elaborate upon this later in Chapter \ref{ch:datastructures}. 
 
-\subsection{Mutexes}
+\subsection{Mutexes and Locks}
 
-A good practice for the use of mutexes is to lock them via the RAII idiom. Since C++11, this is available as \cpp{std::unique_lock} in header \cpp{<mutex>}:
+Standard Template Library in header \cpp{<mutex>}	provides multiple mutexes (of type \cpp{BasicLockable} that implement \cpp{lock} and \cpp{unlock} methods): \cpp{mutex}, \cpp{recursive_mutex}, \cpp{timed_mutex}, \cpp{recursive_timed_mutex}, 
+and \cpp{unique_lock}. 
+
+A good practice for the use of mutexes is to lock them via the RAII idiom. Since C++11, this is available as \cpp{std::unique_lock} and \cpp{std::lock_guard}, and since C++17 \cpp{scoped_lock} in header \cpp{<mutex>}.
+Crucially, using \cpp{scoped_lock} provides the ability to lock multiple mutexes at once, avoiding deadlock.
+One may hence advise to use one or more \cpp{mutex} with a \cpp{scoped_lock} on top. 
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An example of the use of a barrier.
+\footnotesize An example of the use of a unique lock.
 \tcblower
 \cppfile{code_examples/cpp23/mutex1.cpp}
 \end{codebox}
+
+%\raggedbottom
+%\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+%\footnotesize Locking multiple mutexes at once.
+%\tcblower
+%\cppfile{code_examples/cpp23/lock_guard.h}
+%\end{codebox}
 
 A slightly more verbose example considers:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
-\footnotesize An example of the use of a barrier.
+\footnotesize An example of the use of a unique lock.
 \tcblower
 \cppfile{code_examples/cpp23/mutex2.cpp}
 \end{codebox}
