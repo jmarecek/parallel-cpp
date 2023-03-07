@@ -25,5 +25,4 @@ int main() {
     std::osyncstream(std::cout) << "Main thread" << std::endl;
     t.request_stop();
     // std::unique_lock lock(resource.mux);
-    }
 }

@@ -5,7 +5,7 @@
 #include <thread>
 #include <algorithm>
 #include <random>
-​
+
 int main() {
     std::barrier b(5);
     std::vector<std::jthread> ts;
