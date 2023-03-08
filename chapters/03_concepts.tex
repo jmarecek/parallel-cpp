@@ -43,7 +43,7 @@ can lead to a deadlock. One needs to lock both mutexes at the same time.
 Naively, one could run:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/vbhK6anev}{\ExternalLink}}
 \footnotesize Locking multiple mutexes at once.
 \tcblower
 \cppfile{code_examples/cpp23/lock.h}
@@ -125,7 +125,7 @@ The atomic „compare and swap“ (CAS) instruction dereferences a pointer to an
 In C++, the \cpp{atomic} header defines two variants of ``compare and swap'' and a specialization thereof for pointers:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/jGb1PxoxY}{\ExternalLink}}
 \footnotesize Definitions of two variants of ``compare and swap''.
 \tcblower
 \cppfile{code_examples/cpp23/atomic3.h}
@@ -156,10 +156,10 @@ Lock is a very general term for a synchronization primitive. Mutexes are usually
 A spinlock, the thread simply waits ("spins") until the lock becomes available. This is efficient if threads are blocked for a short time, because it avoids the overhead of operating system process re-scheduling. It is inefficient if the lock is held for a long time, or if the progress of the thread that is holding the lock depends on preemption of the locked thread. An intentionally simplistic implementation is presented below.
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/Kf4ocjhqs}{\ExternalLink}}
 \footnotesize A silly implementation of a spin lock.
 \tcblower
-\cppfile{code_examples/cpp23/atomic4.h}
+\cppfile{code_examples/cpp23/atomic4.cpp}
 \end{codebox}
 
 \subsection{Further synchronization features}
