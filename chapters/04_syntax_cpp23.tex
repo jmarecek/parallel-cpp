@@ -124,7 +124,7 @@ A difficulty in using coroutines is the fact that the coroutine may live longer 
 Below, we will see two examples of the use of coroutines that compile with GCC 11 and 12, when you enable -std=c++2b -fcoroutines, but illustrate that the current use of the template class \cpp{std::coroutine_handle<promise>} is a bit unwieldy. 
 First, we need to be able to define a promise class, which defines the behaviour of the coroutine by implementing methods:
 \begin{itemize}
-\item \cpp{coroutine get_return_object()} is called to inialize the coroutine and create the coroutine handle, which can be the rather formulaic \cpp{coroutine_handle::from_promise(*this)};} 
+\item \cpp{coroutine get_return_object()} is called to initialize the coroutine and create the coroutine handle, which can be the rather formulaic \cpp{coroutine_handle::from_promise(*this)};} 
 \item \cpp{std::suspend_always initial_suspend()}, suggests whether the coroutine starts right after initialization (\cpp{std::suspend_never()} ) or upon resumption (\cpp{std::suspend_always()}). (Both awaiterers are described below.)
 \item \cpp{std::suspend_always final_suspend() noexcept}, which can be rather formulaic \cpp{std::suspend_always()}
 \item \cpp{void return_void()} or \cpp{void return_value(const auto& value)}, which is called upon reaching the end of the coroutine and upon reaching \cpp{co_return}. The latter (\cpp{return_value}) often just stores the result locally. 
