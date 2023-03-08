@@ -31,7 +31,7 @@ Depending on the ordering of the reading and writing operations, one may obtain 
 \item Transaction T2 will read \$100 value. Transaction T2 will write \$200 value.
   Transaction T1 will read \$200 valued of Bob's account.  Transaction T1 will write \$150.  
 \end{itemize}
-Either Bob or the bank could be \$50 short. 
+Either Bob or the bank could be \$100 short. 
 
 \subsection{Deadlock}
 
@@ -51,10 +51,10 @@ Naively, one could run:
 
 In theory, a deadlock (Czech: ``problém uváznutí'') can occur when:
 \begin{itemize}
-\item each lock is owned by at most one thread
-\item each thread has locked at least one thread and needs to lock at least one more thread
+\item each lock is owned by one thread
+\item each thread has locked at least one lock and needs to lock at least one more lock
 \item it is impossible to remove the lock ownership
-\item there is a cyclic dependency among the locks
+\item there is a cyclic dependency among the lock-using threads.
 \end{itemize}
 
 \subsection{Concurrent programming}
