@@ -63,7 +63,9 @@ There are two essential models for concurrent programming: shared memory and mes
 \begin{itemize}
 \item Confinement: Do not share memory between threads. This is often impossible.
 \item Immutability: Do not share any mutable data between threads. 
-\item Thread-safe code: Use data types with additional guarantees for storing any mutable data shared between threads, or even better, use implementations of algorithms that are already parallelized and handle the concurrency issues for you. For example in C++, one can use the standard template library with a suitable execution policy. In particular, the header \cpp{execution} defines objects \cpp{std::execution::seq}, \cpp{std::execution::par}, \cpp{std::execution::par_unseq}, which can be passed as the first argument of any standard algorithm, e.g., \cpp{std::vector<int> my_data; std::sort(std::execution::par,my_data.begin(),my_data.end());}. See Section \ref{sec:foreachcpp23} for more examples.
+\item Thread-safe code: Use data types with additional guarantees for storing any mutable data shared between threads, or even better, use implementations of algorithms that are already parallelized and handle the concurrency issues for you. For example in C++, one can use the standard template library with a suitable execution policy. In particular, the header \cpp{execution} defines objects \cpp{std::execution::seq}, \cpp{std::execution::par}, \cpp{std::execution::par_unseq}, which can be passed as the first argument of any standard algorithm, e.g., \\
+\cpp{std::vector<int> my_data; std::sort(std::execution::par,my_data.begin(),my_data.end());}\\
+See Section \ref{sec:foreachcpp23} for more examples.
 \item Synchronization: Use synchronization primitives to prevent accessing the variable at the same time. This option is explored in this chapter in more detail. 
 \end{itemize}
 Eventually, we will see that message passing can be implemented using the synchronization primitives and may be the least challenging to use correctly. 
@@ -164,7 +166,7 @@ A spinlock, the thread simply waits ("spins") until the lock becomes available. 
 
 \subsection{Further synchronization features}
 
-Fences help order non-atomic and atomic memory accesses, without any associated operations. On Intel architectures (including x86-64), \cpp{atomic_thread_fence} do not issue any instructions, except \cpp{std::atomic_thread_fence(std::memory_order::seq_cst)}.
+Fences help order non-atomic and atomic memory accesses, without any associated operations. On Intel architectures (including x86-64), \cpp{atomic_thread_fence} do not issue any instructions, except for\\\cpp{std::atomic_thread_fence(std::memory_order::seq_cst)}.
 
 Barrier provides a thread-coordination mechanism that blocks a group of threads until all threads in that group have reached the barrier. Such a barrier can be used repeatedly to wait until a number of threads have finished their operations. 
 

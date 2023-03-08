@@ -46,13 +46,13 @@ By default, the number of threads is set based on the available hardware threads
 
 The construct can take a number of modifiers, including:
 \begin{itemize}
-\item num_threads: number of threads to use in the team
-\item private(list of variables): those variables will be private to each thread 
-\item firstprivate(list of variables): those variables will be private to each thread, but initially will copy a value from the master thread using the default copy constructor. 
-\item shared(list of variables): these variables will be shared between the master thread and all threads in the new team. It is the programmers responsibility to keep the variables constructed as long as the parallel region is running
-\item default: values of \cpp{private}, \cpp{firstprivate}, \cpp{shared}, \cpp{none} suggest what should be the default behaviour for variables not listed above. The default is \cpp{shared}, which is suboptimal from both performance and thread-safety perspective. It is wise to issue \cpp{default(none)}. 
-\item reduction(reduction-identifier : list) suggests that variables in list should be treated as shared, when they are used by the function \cpp{reduction-identifier}, which could also take the special values of +, -, *, \&, |, ^, ||, max, min. The list can include array elements and, when \cpp{reduction-identifier} is a static function of a class, accessible data objects of the object. \label{sec:reduction1}
-\item proc_bind: values of \cpp{master} and \cpp{close} and \cpp{spread} suggest how far from the master thread should be executed the new threads (same code, close in non-uniform architectures, as far as possible in non-uniform architectures) 
+\item \cpp{num_threads}: number of threads to use in the team
+\item \cpp{private}(list of variables): those variables will be private to each thread 
+\item \cpp{firstprivate}(list of variables): those variables will be private to each thread, but initially will copy a value from the master thread using the default copy constructor. 
+\item \cpp{shared}(list of variables): these variables will be shared between the master thread and all threads in the new team. It is the programmers responsibility to keep the variables constructed as long as the parallel region is running
+\item \cpp{default}: values of \cpp{private}, \cpp{firstprivate}, \cpp{shared}, \cpp{none} suggest what should be the default behaviour for variables not listed above. The default is \cpp{shared}, which is suboptimal from both performance and thread-safety perspective. It is wise to issue \cpp{default(none)}. 
+\item \cpp{reduction}(reduction-identifier : list) suggests that variables in list should be treated as shared, when they are used by the function \cpp{reduction-identifier}, which could also take the special values of $+, -, *, \&, |, ^, ||, \max, \min$. The list can include array elements and, when \cpp{reduction-identifier} is a static function of a class, accessible data objects of the object. \label{sec:reduction1}
+\item \cpp{proc_bind}: values of \cpp{master} and \cpp{close} and \cpp{spread} suggest how far from the master thread should be executed the new threads (same core, close in non-uniform architectures, as far as possible in non-uniform architectures).
 %\item allocate([allocator :] list)
 \end{itemize}
 
@@ -85,8 +85,8 @@ This requires sizing the work in each thread depending on the number of threads,
 
 An alternative, non-iterative structuring of the code is possible with sections.
 Each section is a block of code executed by one thread of the current thread team (corresponding to the innermost enclosing parallel region). 
-One can use private, firstprivate, lastprivate, and reduction modifiers, similar to the parallel construct. 
-There is an implied barrier of the sections region, unless eliminated by a nowait clause.
+One can use \cpp{private}, \cpp{firstprivate}, \cpp{lastprivate}, and \cpp{reduction} modifiers, similar to the parallel construct. 
+There is an implied barrier of the sections region, unless eliminated by a \cpp{nowait} clause.
 See, for example:
 
 \raggedbottom
