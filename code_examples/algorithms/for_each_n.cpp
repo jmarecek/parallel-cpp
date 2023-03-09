@@ -1,3 +1,6 @@
+// From "The Standard Algorithms in C++" by Simon Toth
+// See https://github.com/HappyCerberus/book-cpp-algorithms
+
 #include <vector>
 #include <algorithm>
 #include <iostream>
