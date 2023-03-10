@@ -1,28 +1,27 @@
 \chapter{The Syntax in OpenMP}
 
-OpenMP is a specification for concurrency (parallel programming of shared memory systems) in Fortran, C, and C++. 
-The current version of the specification can be downloaded from \url{https://www.openmp.org/wp-content/uploads/OpenMP-API-Specification-5-2.pdf}.
+OpenMP is a specification for parallel programming of shared-memory systems in Fortran, C, and C++. 
+The current version of the specification can be downloaded from \url{https://www.openmp.org/wp-content/uploads/OpenMP-API-Specification-5-2.pdf}, with many examples at \url{https://github.com/OpenMP/Examples}.
 
 The specification is built on top of the fork-join model of parallel execution (sériově-paralelní model uspořádání vláken),
 but generally does not provide any guarantees as to how a particular directive or function is implemented. 
-This also means that running on a different hardware may result in different order of execution of floating-point operations or similar.  
+This also means that running on a different hardware may result in different order of execution of floating-point operations and vastly different performance.  
 Prime implementations include 
 \begin{itemize}
 \item libgomp (GOMP) for GCC, 
 \item libomp for clang, and 
 \item liomp5 (IOMP) for ICC/Clang.
 \end{itemize} 
-There are no guarantees that the output or performance will stay the same across multiple implementations. 
 
-OpenMP combines preprocessor directives (pragmas) and a library of functions exported via \cpp{omp.h}.
-Ideally one and the same program written with OpenMP should be possible to run as serial code, or with any number of threads. 
-Many OpenMP programs use only the preprocessor directives, which makes it possible to compile them even as serial code even without OpenMP-aware compiler. 
+OpenMP specifies preprocessor directives (pragmas) and a library of functions exported via \cpp{omp.h}.
+Ideally, one and the same program written with OpenMP should be possible to run as serial code, or with any number of threads. 
+Many OpenMP programs use only the preprocessor directives, which makes it possible to compile them as serial code even without OpenMP-aware compiler. 
 
 There is a long history of the evolution of OpenMP since 1997, from a 50-page long specification of OpenMP 1.0, through 150-page version 3.0 (introducing ``tasks'') and 250-page version 4.0 (adding GPGPU support), to much longer versions recently. 
 Traditional implementations of OpenMP have been rather closely built on top of Pthreads, 
 which results in the lack of fine-grained scheduling, 
 memory management, network management, signaling, etc.
-The lack of fine-grained scheduling notably means the lack of user-level threads (co-routines)
+The lack of fine-grained scheduling notably meant the lack of user-level threads (co-routines)
 and the lack of queries as to the number of hardware threads utilized by other processes, 
 which often results in high overhead when the number of threads (across all processes!) increases above the number of hardware threads supported.
 Since OpenMP 5.0, the distinction between threads and tasks has been erased and thread teams are also cast into tasks. There are now also OpenMP implementations over lightweight threads, notably (BOLT is OpenMP over Lightweight Threads, https://www.bolt-omp.org/). 
@@ -48,7 +47,8 @@ The construct can take a number of modifiers, including:
 \begin{itemize}
 \item \cpp{num_threads}: number of threads to use in the team
 \item \cpp{private}(list of variables): those variables will be private to each thread 
-\item \cpp{firstprivate}(list of variables): those variables will be private to each thread, but initially will copy a value from the master thread using the default copy constructor. 
+\item \cpp{firstprivate}(list of variables): those variables will be private to each thread, but initially their value will be copied from the master thread using the default copy constructor. 
+item \cpp{lastprivate}(list of variables): those variables will be private to each thread, but at the end, their value will be copied to the master thread using the default copy constructor. 
 \item \cpp{shared}(list of variables): these variables will be shared between the master thread and all threads in the new team. It is the programmers responsibility to keep the variables constructed as long as the parallel region is running
 \item \cpp{default}: values of \cpp{private}, \cpp{firstprivate}, \cpp{shared}, \cpp{none} suggest what should be the default behaviour for variables not listed above. The default is \cpp{shared}, which is suboptimal from both performance and thread-safety perspective. It is wise to issue \cpp{default(none)}. 
 \item \cpp{reduction}(reduction-identifier : list) suggests that variables in list should be treated as shared, when they are used by the function \cpp{reduction-identifier}, which could also take the special values of $+, -, *, \&, |, ^, ||, \max, \min$. The list can include array elements and, when \cpp{reduction-identifier} is a static function of a class, accessible data objects of the object. \label{sec:reduction1}
@@ -69,7 +69,7 @@ See, for example:
 
 Since version 5.0, one can also utilize the \cpp{teams} construct on its own, optionally with a target (such a GPGPU). 
 
-\subsection{Threads}
+\subsection{Threads and their Sizing}
 
 As has been mentioned above, ideally one and the same program written with OpenMP should be possible to run as serial code, or with any number of threads. 
 This requires sizing the work in each thread depending on the number of threads, such as in:
@@ -103,7 +103,7 @@ See, for example:
 \cppfile{code_examples/openmp/section2.cpp}
 \end{codebox}
 
-\subsection{Coroutines / Tasks}
+\subsection{Tasks}
 
 The closest to a coroutine in OpenMP is the concept of a task. While it does not come with a promise of an implementation with a user-level thread library (cf. Argobots, Converse threads,	Qthreads,	MassiveThreads, Nanos++, Maestro, GnuPth, StackThreads/MP, Protothreads, Capriccio, StateThreads, TiNy-threads, etc), it often is implemented thus.  
 
@@ -117,18 +117,29 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 \subsection{Kernels}
 
 There is a nascent support for the use of GPGPUs via \cpp{target} construct.
-While the block following the target construct can be arbitrary, in principle, most GPUs are not able to support arbitrary code. Specifically, there are usually no synchronization primitives available and no coherence between L1 caches. Often, block requiring anything beyond the basic arithmetics will execute only on one core (``stream multiprocessor'') of the GPGPU. Ideally, one should combine the offloading of the code to the GPGU (via the target), across multiple cores (via teams construct), and then across the code. This can get quite non-trivial:
+While the block following the target construct can be arbitrary, in principle, most GPUs are not able to support arbitrary code. Specifically, there are usually no synchronization primitives available and no coherence among L1 caches. Often, block requiring anything beyond the basic arithmetics will execute only on one core (``stream multiprocessor'') of the GPGPU. Ideally, one should combine the offloading of the code to the GPGU (via the target), across multiple cores (via teams construct), and then across the code. This can get quite non-trivial:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/TM5WjPvT9}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP targets and teams.
 \tcblower
-\cppfile{code_examples/openmp/task1.cpp}
+\cppfile{code_examples/openmp/target1.h}
 \end{codebox}
+
+\raggedbottom
+\begin{codebox}[]{}{}
+\footnotesize Another example of the use of OpenMP targets and teams.
+\tcblower
+\cppfile{code_examples/openmp/target2.h}
+\end{codebox}
+
+We could also use the nowait clause to make the target constructs asynchronous, resembling other OpenMP tasks,
+but that does not match the ``lockstep'' execution on the GPGPUs. 
 
 We refer to:
 \url{https://www.archer.ac.uk/training/course-material/2019/06/AdvOpenMP-manch/L10-OpenMPTargetOffload.pdf}
-from which we took this example for an excellent introduction.
+from which we took the first example and to \url{https://www.openmp.org/wp-content/uploads/2021-10-20-Webinar-OpenMP-Offload-Programming-Introduction.pdf} from which we took the second example. 
+
 
 \section{Synchronisation Primitives}
 

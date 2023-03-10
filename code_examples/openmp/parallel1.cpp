@@ -4,7 +4,7 @@
 
 int main() {
 
-#pragma omp parallel
+#pragma omp parallel default(none)
     {
         int iam = omp_get_thread_num();
         int nt =  omp_get_num_threads();

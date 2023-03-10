@@ -97,9 +97,9 @@ In C++23 and subsequent versions, we hope to see some standard syntax for defini
 \cppfile{code_examples/cpp23/coroutines1.cpp}
 \end{codebox}
 
-In terms of using the coroutine, there are three new keywords:
+Already, there are three new keywords:
 \begin{itemize}
-\item \cpp{co_await awaiter} suspends computation and block the co-routine until the computation is resumed by another co-routine calling ``resume'' method of the present coroutine. In the process, it tests whether it is possible to suspend the computation using an awaiter such as \cpp{std::suspend_always{};} (or an awaitable object, more generally, as discussed below) and, if so, saves all local variables to a heap-allocated handle.
+\item \cpp{co_await awaiter} suspends computation and block the co-routine until the computation is resumed by another co-routine calling ``resume'' method of the present coroutine. In the process, it tests whether it is possible to suspend the computation using an awaiter (such as \cpp{std::suspend_always{};}) and, if so, saves all local variables to a heap-allocated handle.
 \item \cpp{co_yield} yields a value and suspends computation as above, and  
 \item \cpp{co_return} returns a value. (There is no notion of an optional return type in-built.)
 \begin{end}
@@ -181,7 +181,7 @@ By defining \cpp{await_transform()} in the promise type, the compiler will use \
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/WKn5h181v}{\ExternalLink}}
-\footnotesize An example defining a Generator (1/2).
+\footnotesize An example defining a Generator (2/2).
 \tcblower
 \cppfile{code_examples/cpp23/coroutines4.cpp}
 \end{codebox}
@@ -217,26 +217,6 @@ For more details, see Simon Toth's Complete guide at \url{https://itnext.io/c-20
 For the technical specification, see \url{https://github.com/GorNishanov/coroutines-ts}.
 
 \section{Synchronisation Primitives}
-
-\subsection{Barrier}
-
-Since C++20, there is support for barriers in header \cpp{<barrier>}. The constructor takes an integer value, which is the number of threads that the barrier is expected to block. The key methods are \cpp{arrive_and_wait()} and \cpp{arrive_and_drop()}. The former functions as one would expect. The latter decrements the initial expected count for all uses by one, as if one thread could never reach the barrier subsequently. This can be very useful in error management:
-
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/KrzfYe88s}{\ExternalLink}}
-\footnotesize An example of the use of a barrier.
-\tcblower
-\cppfile{code_examples/cpp23/barrier1.cpp}
-\end{codebox}
-
-More complicated uses of barriers may use the template parameter \cpp{CompletionFunction} and have a callable executed whenever the barrier is hit (reaches zero):
-
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/EjW8xc8fc}{\ExternalLink}}
-\footnotesize An example of the use of a barrier.
-\tcblower
-\cppfile{code_examples/cpp23/barrier2.cpp}
-\end{codebox}
 
 \subsection{Atomic Variables}
 \label{sec:atomiccpp23}
@@ -300,6 +280,26 @@ A slightly more verbose example considers:
 \footnotesize An example of the use of a unique lock.
 \tcblower
 \cppfile{code_examples/cpp23/mutex2.cpp}
+\end{codebox}
+
+\subsection{Barrier}
+
+Since C++20, there is support for barriers in header \cpp{<barrier>}. The constructor takes an integer value, which is the number of threads that the barrier is expected to block. The key methods are \cpp{arrive_and_wait()} and \cpp{arrive_and_drop()}. The former functions as one would expect. The latter decrements the initial expected count for all uses by one, as if one thread could never reach the barrier subsequently. This can be very useful in error management:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/KrzfYe88s}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/cpp23/barrier1.cpp}
+\end{codebox}
+
+More complicated uses of barriers may use the template parameter \cpp{CompletionFunction} and have a callable executed whenever the barrier is hit (reaches zero):
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/EjW8xc8fc}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/cpp23/barrier2.cpp}
 \end{codebox}
 
 \section{Algorithms in the Standard Template Library}
