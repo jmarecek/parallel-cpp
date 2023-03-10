@@ -1,6 +1,5 @@
 #include <iostream>
 #include <syncstream>
-#include <thread>
 #include "omp.h"
 
 void work() {

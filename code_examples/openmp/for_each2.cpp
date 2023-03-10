@@ -1,19 +1,17 @@
 #include <iostream>
-#include <vector>
+#include <syncstream>
 #include "omp.h"
 
-int main(int argc, char* argv[]) {
+int main() {
 #pragma omp parallel 
-    {
-        std::cout << "this is a line printed by thread" << omp_get_thread_num() << std::endl;
+  {
+    std::osyncstream(std::cout) << "Thread" << omp_get_thread_num() << std::endl;
 
 #pragma omp for
-        for (int i=0; i<10; i++)
-            std::cout << "for-loop line " << i << " printed by thread" << omp_get_thread_num() << std::endl;
-
+    for (int i=0; i<10; i++)
+      std::osyncstream(std::cout) << "For i = " << i << " in t = " << omp_get_thread_num() << std::endl;
     }
 
-    std::cout << "Hello from the main thread\n";
-
+    std::osyncstream(std::cout) << "Main thread\n";
     return 0;
 }

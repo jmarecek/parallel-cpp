@@ -1,27 +1,24 @@
 #include <iostream>
-#include <vector>
+#include <syncstream>
 #include "omp.h"
 
 const int thread_count = 2;
 
-void method(const int& i) {
-    int my_rank = omp_get_thread_num();
-    int thread_count = omp_get_num_threads();
-    std::cout << "Hello from method " << i << " by thread " << my_rank << std::endl;
+void work(const int& i) {
+  int iam = omp_get_thread_num();
+  std::osyncstream(std::cout) << "Hello from work(" << i << ") by t = " << iam << std::endl;
 }
 
 int main(int argc, char* argv[]) {
-
 #pragma omp parallel num_threads(thread_count)
-    {
+  {
 #pragma omp sections
-        {
+    {
 #pragma omp section
-            { method(1); }
+      { work(1); }
 #pragma omp section
-            { method(2); }
-        }
+      { work(2); }
     }
-
-    return 0;
+  }
+  return 0;
 }

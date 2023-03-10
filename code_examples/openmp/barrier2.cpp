@@ -1,7 +1,8 @@
 #include <iostream>
+#include <syncstream>
 #include "omp.h"
 
-void work(int n) { std::cout << n; }
+void work(int n) { std::osyncstream(std::cout) << n; }
 void sub3(int n)
 {
     work(n);
