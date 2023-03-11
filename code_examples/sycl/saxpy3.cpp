@@ -2,7 +2,8 @@
 
 #include <iostream>
 #include "CL/sycl.hpp"
-namespace sycl = cl::sycl;
+
+class saxpy3;
 
 int main(int argc, char * argv[]) {
   std::vector<float> vx(1048576, 1.0);
