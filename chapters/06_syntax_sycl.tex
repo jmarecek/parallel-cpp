@@ -1,6 +1,8 @@
 \chapter{The Syntax in SYCL}
 
-SYCL is an open specification for the design of code targeting either CPUs or GPGPUs. 
+SYCL is an open specification for the design of code targeting either CPUs or GPGPUs 
+that builds on OpenCL and utilizes templates and lambda functions.
+By ``open'' in ``open specification'' we mean it is not tied specifically to NVIDIA. 
 The current version is SYCL 2020, released in 2021. 
 If you want to learn more about SYCL, see 
 \url{https://github.com/codeplaysoftware/syclacademy} for an extensive tutorial.
@@ -9,7 +11,43 @@ In the text, we omit the \cpp{sycl} namespace, where there is no risk of confusi
 
 \section{Motivation}
 
-In the previous chapter, we have seen the use of \cpp{target} 
+In the previous chapter, we have seen the use of \cpp{target} to implement SAXPY. Now we clearly could have used some native, closed API, such as CUDA, if we had an NVIDIA GPGPU:
+
+\raggedbottom
+\begin{codebox}[]{}
+\footnotesize SAXPY in CUDA C++.
+\tcblower
+\cppfile{code_examples/sycl/saxpy1.cpp}
+\end{codebox}
+
+Admittedly, code in CUDA C++ still looks like C and is not easily portable to any other platform (AMD, Intel, ARM Mali). We could have also used Thrust, the CUDA C++ template library (\url{https://thrust.github.io/}): 
+
+\raggedbottom
+\begin{codebox}[]{}
+\footnotesize SAXPY in Thrust, the CUDA C++ template library.
+\tcblower
+\cppfile{code_examples/sycl/saxpy2.cpp}
+\end{codebox}
+
+The code is beautiful, but we it is not easily portable to another platform (AMD, Intel, ARM Mali). There may be several good reasons not to be tied specifically to NVIDIA:
+\begin{itemize}
+\item In consumer PC market, the biggest vendor of PC GPU is Intel with 71 percent of the market by unit count as of Q4 2022. NVIDIA has a market share of 17 percent and AMD 12 percent. In discrete PC GPU market, NVIDIA occupies 80-90\% of the market, according to various estimates. 
+Note that this market is rapidly declining.
+\item In mobile GPGPUs, ARM Mali is estimated to have close to 40\% market share.  
+\item In gaming consoles, both Xbox and PlayStation use accelerators by AMD. 
+\item In high-performance computing, NVIDIA is dominant, but the top 1 system (Frontier) currently uses AMD Instinct™ 250X accelerators, and number of other systems use ARM architectures. 
+\end{itemize}
+
+In this chapter, we hence consider SYCL, where the same example would resemble:
+
+\raggedbottom
+\begin{codebox}[]{}
+\footnotesize SAXPY in SYCL, the open specification.
+\tcblower
+\cppfile{code_examples/sycl/saxpy3.cpp}
+\end{codebox}
+
+The code is also clearly modern C++, and can be compiled to a large number of platforms (NVIDIA, AMD, Intel, ARM Mali).
 
 \section{More concepts}
 

@@ -1,3 +1,4 @@
+#include <vector>
 #include <iostream>
 #include <cuda.h>
 #define N 1048576
@@ -23,4 +24,8 @@ int main(){
   int nblocks = (n + 255) / 256;
   saxpy_kernel<<<nblocks, 256>>>(3.1415, dx, dy, dz);
   cudaMemcpy(z, dz, N*sizeof(float), cudaMemcpyDeviceToHost);
+  cudaFree(dx);
+  cudaFree(dy);
+  cudaFree(dz);
+  // we do not need free(x), free(y), free(z) 
 }

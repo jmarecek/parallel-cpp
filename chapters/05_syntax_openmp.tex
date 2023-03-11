@@ -145,7 +145,8 @@ Compiling OpenMP with offloading is non-trivial. As has been mentioned in the in
 \begin{itemize}
 \item NVIDIA CUDA Compiler Driver NVCC may be the easiest to use with NVIDIA hardware. For A100 of the RCI cluster, use cc80: \verb|nvcc –mp=gpu -gpu=cc80|
 \item clang/LLVM compilers uses \verb|clang++ -fopenmp -fopenmp-targets=<target triple>| where the triple is documented at \url{https://llvm.org/doxygen/Triple_8h_source.html} such as \verb|clang++ -fopenmp -fopenmp-targets=nvptx64 -O3|
-\item AMD ROC is built on top of Clang: \verb|clang -fopenmp -offload-arch=gfx908|
+\item AMD ROC is built on top of Clang, so starting with \verb|clang -fopenmp -offload-arch=gfx908| is a good idea. In more detail,  
+\verb|-target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=<gpu-arch>|
 \item Intel Compiler Collection is, since 2021, also built on top of Clang, except still uses the Intel OpenMP library, so you start with \verb|icx -fiopenmp -fopenmp-targets=<target triple>|. Intel has support for \verb|spir64| and \verb|spirv64| architectures, as well as the above.
 \item NVIDIA on Power with IBM Open XL C/C++ for Linux on Power: \verb|xlc –qsmp –qoffload –qtgtarch=sm_70|
 \end{itemize} 
