@@ -136,6 +136,16 @@ While the block following the target construct can be arbitrary, in principle, m
 We could also use the nowait clause to make the target constructs asynchronous, resembling other OpenMP tasks,
 but that does not match the ``lockstep'' execution on the GPGPUs. 
 
+The advantage is that from the ``top-level perspective'', the use of the example above remains standard: 
+
+\raggedbottom
+\begin{codebox}[]{}{}
+\footnotesize Compiling the example above.
+\tcblower
+\cppfile{code_examples/openmp/target2.cpp}
+\end{codebox}
+
+
 Compiling OpenMP with offloading is non-trivial. As has been mentioned in the introduction to this chapter, there are multiple implementations of OpenMP. Most likely, you have used \verb|gcc -fopenmp|, so far. Depending on what GPGPUs you wish to target, you may need to switch:
 
 %Intel compilers are among those supporting SPIR-V, which is a modern binary low-level intermediate language used across OpenCL, OpenGL, and Vulkan.
@@ -153,7 +163,7 @@ Compiling OpenMP with offloading is non-trivial. As has been mentioned in the in
 
 We refer to:
 \url{https://www.archer.ac.uk/training/course-material/2019/06/AdvOpenMP-manch/L10-OpenMPTargetOffload.pdf}
-from which we took the first example and to \url{https://www.openmp.org/wp-content/uploads/2021-10-20-Webinar-OpenMP-Offload-Programming-Introduction.pdf} from which we took the second example. 
+from which we took the first example and to \url{https://www.openmp.org/wp-content/uploads/2021-10-20-Webinar-OpenMP-Offload-Programming-Introduction.pdf}, from which we adapted the second example, for further details. 
 
 \section{Synchronisation Primitives}
 
