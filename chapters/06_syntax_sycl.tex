@@ -7,7 +7,7 @@ The current version is SYCL 2020, released in 2021.
 If you want to learn more about SYCL, see 
 \url{https://github.com/codeplaysoftware/syclacademy} for an extensive tutorial.
 
-In the text, we omit the \cpp{sycl} namespace, where there is no risk of confusion, just as we have omitted the \cpp{std} earlier. 
+In the text, we omit the \cpp{sycl} namespace, where there is no risk of confusion, just as we have omitted the \cpp{std} earlier. The difficulty 
 
 \section{Motivation}
 
@@ -47,7 +47,7 @@ In this chapter, we hence consider SYCL, where the same example would resemble:
 \cppfile{code_examples/sycl/saxpy3.cpp}
 \end{codebox}
 
-The code is also clearly modern C++, and can be compiled to a large number of platforms (NVIDIA, AMD, Intel, ARM Mali).
+The code is also clearly modern C++, and can target accelerators by a number of vendors (NVIDIA, AMD, Intel, ARM), as well as FPGA.
 
 \section{More concepts}
 
@@ -74,13 +74,12 @@ through which we orchestrate work on the device.
 In a constructor of a queue, we pass the device, which cannot be changed later,
 but one can create further queues for the same device.
 A key method is \cpp{queue.submit},
-which passes a ``command group'' for asynchronous execution. 
+which passes a `` command group function object'' for asynchronous execution. 
 
-A command group is, essentially, composed of a set of requirements and actual commands executing a kernel. 
-\emph{ELABORATE!}
-The kernel then receives a ``command group handler'' from the SYCL as its argument,
-and uses it to access the API. 
-A command group submission to the group is atomic.  
+At the simplest, a command group'' is a callable (a named type, a lambda function, or std::function), which receives a ``command group handler'' from the SYCL as an argument of \cpp{operator()} so as to access the API. 
+A command group submission to the queue is atomic.  
+
+A command group objects may also combine the callable and a set of requirements (edges of a task-graph), but if declare the accessors for memory access correctly (see below), the task-graph will be constructed based on the accessors. 
 
 Asynchronous execution also means an undefined order of execution, 
 unless we use \cpp{wait} or suggest the dependencies between the ``actions'' in the form of a task graph.
@@ -188,7 +187,7 @@ See the example below:
 Depending on the details of the use of a barrier, one may wish to use \cpp{sycl::queue::wait()} and \cpp{sycl::queue::wait_and_throw()}, or \cpp{item::barrier(access::fence_space)} within a kernel.
 
 
-\subsection{More complex examples}
+\section{More complex examples}
 
 First, let us consider a complete, working example:
 
@@ -208,7 +207,7 @@ Next, let us consider an example that uses work groups and local memory in an at
 \cppfile{code_examples/sycl/buffer4.cpp}
 \end{codebox}
          
-\subsection{Building code}
+\section{Building code}
 
 Compiling code with SYCL should require passing ``-fsycl'' to a compiler that supports the SYCL 2020 specification, 
 but it often turns out to be substantially more complicated than with standard C++23 or OpenMP.
