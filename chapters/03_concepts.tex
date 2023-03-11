@@ -110,7 +110,7 @@ With \cpp{memory_order_release} and \cpp{memory_order_acquire} specifiers, we fo
 
 With \cpp{memory_order_seq_cst}, we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent \cpp{memory_order_seq_cst store}. This is the default option. 
 
-See \url{https://arxiv.org/abs/1803.04432} for a nice overview and \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConference} for a nice lecture. 
+See \cite{Poter2018} for an informal overview, \cite{Alglave2012} for a formal overview, and \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConference} for a nice lecture. 
 
 \subsection{Compare and swap}
 
