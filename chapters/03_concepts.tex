@@ -97,9 +97,17 @@ A \emph{task} is a rather abstract unit of work, e.g., a function, which can be 
 
 \section{Hardware support}
 
+\subsection{Cache hierarchies}
+
+Most modern computers utilize complicated cache hierarchies. One may have 32 KB of L1 cache and 256-512 KB of L2 cache on each core, with cca. 1 ns and 3-4 ns latencies, respectively. (This will get reported as 32 MB of L2 cache on a Threadripper 3990X.) One may have many megabytes of L3 cache shared between the cores in some non-uniform fashion, with non-uniform latency of 10-20 ns. Finally, one may access the memory in cca. 60 ns. Compare these times with the 0.27 ns cycle time of a processor clocked at 3.7 GHz. 
+
+Crucially, the times above are the best-case performance. To understand the worst-case performance, one needs to understand cache snooping (with a write-invalidate protocol). Most modern cores monitor a stream of memory loads and stores across the whole shared-memory machine. If a transaction concerns store in a block cached on the core (processor), the core sets some ``invalid'' flag to the block in its cache. If the core wishes to read a block with the ``invalid'' flag, it will ask all other cores for a valid value. Obtaining the correct value takes time. 
+
+As we will see in the distributed-memory part of the course, one can also maintain the coherence otherwise, which is known as the  directory-based coherency mechanism. Either way, cache coherence defines the requirements on concurrent reads and writes to the same address. To some extent, it masks the presence of cache hierarchies in any modern computing system. 
+
 \subsection{Memory order}
 
-First, one should like to understand several options for implementing synchronization primitives, known as ``memory orders''.
+Thus, there are several options for implementing synchronization primitives, known as ``memory orders'' or memory consistency. They define allowed behaviours of loads and stores to different addresses.
 All guarantee atomicity and modification-order consistency.
 
 In \cpp{memory_order_relaxed}, no further guarantees are provided and specifically no order is imposed on concurrent memory accesses. This is also how weakly-ordered architectures (e.g. ARM) operate, by default: if two threads access shared memory the load in one thread does not have to read a value written by another thread very recently.
@@ -108,7 +116,7 @@ With \cpp{memory_order_release} and \cpp{memory_order_acquire} specifiers, we fo
 
 (In earlier version of C++ standard, there were further memory models defined for the sake of DEC Alpha architecture. At least \cpp{memory_order_consume} is deprecated as of C++17.) 
 
-With \cpp{memory_order_seq_cst}, we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent \cpp{memory_order_seq_cst store}. This is the default option. 
+With \cpp{memory_order_seq_cst} (sequential consistency), we additionally require a single total ordering of all modifications (with this specifier). A load with this specifier gets its value either from the last store with this specifier or from some store without this specifier that did not precede the most recent \cpp{memory_order_seq_cst store}. This is the default option and the strongest form of consistency, but it may also seem weak, in that one considers the ordering of the instructions the processor chose, rather than the ordering the programmer wrote down. 
 
 See \cite{Poter2018} for an informal overview, \cite{Alglave2012} for a formal overview, and \url{https://www.youtube.com/watch?v=A_vAG6LIHwQ&ab_channel=ACCUConference} for a nice lecture. 
 
