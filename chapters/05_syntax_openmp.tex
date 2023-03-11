@@ -136,10 +136,23 @@ While the block following the target construct can be arbitrary, in principle, m
 We could also use the nowait clause to make the target constructs asynchronous, resembling other OpenMP tasks,
 but that does not match the ``lockstep'' execution on the GPGPUs. 
 
+Compiling OpenMP with offloading is non-trivial. As has been mentioned in the introduction to this chapter, there are multiple implementations of OpenMP. Most likely, you have used \verb|gcc -fopenmp|, so far. Depending on what GPGPUs you wish to target, you may need to switch:
+
+%Intel compilers are among those supporting SPIR-V, which is a modern binary low-level intermediate language used across OpenCL, OpenGL, and Vulkan.
+
+% g++-mp-12
+
+\begin{itemize}
+\item NVIDIA CUDA Compiler Driver NVCC may be the easiest to use with NVIDIA hardware. For A100 of the RCI cluster, use cc80: \verb|nvcc –mp=gpu -gpu=cc80|
+\item clang/LLVM compilers uses \verb|clang++ -fopenmp -fopenmp-targets=<target triple>| where the triple is documented at \url{https://llvm.org/doxygen/Triple_8h_source.html} such as \verb|clang++ -fopenmp -fopenmp-targets=nvptx64 -O3|
+\item AMD ROC is built on top of Clang: \verb|clang -fopenmp -offload-arch=gfx908|
+\item Intel Compiler Collection is, since 2021, also built on top of Clang, except still uses the Intel OpenMP library, so you start with \verb|icx -fiopenmp -fopenmp-targets=<target triple>|. Intel has support for \verb|spir64| and \verb|spirv64| architectures, as well as the above.
+\item NVIDIA on Power with IBM Open XL C/C++ for Linux on Power: \verb|xlc –qsmp –qoffload –qtgtarch=sm_70|
+\end{itemize} 
+
 We refer to:
 \url{https://www.archer.ac.uk/training/course-material/2019/06/AdvOpenMP-manch/L10-OpenMPTargetOffload.pdf}
 from which we took the first example and to \url{https://www.openmp.org/wp-content/uploads/2021-10-20-Webinar-OpenMP-Offload-Programming-Introduction.pdf} from which we took the second example. 
-
 
 \section{Synchronisation Primitives}
 
@@ -165,7 +178,8 @@ depends on the settings of the nesting:
 \cppfile{code_examples/openmp/barrier2.cpp}
 \end{codebox}
 
-Barrier is also implied by the entry and exit in parallel regions.
+Barrier is also implied by the entry and exit in \cpp{parallel} regions.
+There is also an implicit barrier at the end of a \cpp{for}, \cpp{sections}, \cpp{scope}, and \cpp{workshare} constructs, unless one explicitly adds a \cpp{nowait} clause.
 
 \subsection{Fences and Flushes}
 
@@ -263,6 +277,12 @@ OpenMP makes it possible to use ``for each'':
 \tcblower
 \cppfile{code_examples/openmp/for_each2.cpp}
 \end{codebox}
+
+\section{Exercises}
+\label{sec:}
+
+A useful exercise may be to consider a simple ray tracer \url{https://github.com/ssloy/tinyraytracer/blob/master/tinyraytracer.cpp} with basic OpenMP parallelization and to try to target a GPGPU. 
+
 
 %\subsection{Reduce}
 %\subsection{Merge}

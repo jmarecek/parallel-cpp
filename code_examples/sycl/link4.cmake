@@ -1,0 +1,1 @@
+-fsycl -fsycl-targets=amdgcn-amd-amdhsa -Xsycl-target-backend –offload-arch=gfx906

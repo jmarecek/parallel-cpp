@@ -5,6 +5,11 @@ The current version is SYCL 2020, released in 2021.
 If you want to learn more about SYCL, see 
 \url{https://github.com/codeplaysoftware/syclacademy} for an extensive tutorial.
 
+In the text, we omit the \cpp{sycl} namespace, where there is no risk of confusion, just as we have omitted the \cpp{std} earlier. 
+
+\section{Motivation}
+
+In the previous chapter, we have seen the use of \cpp{target} 
 
 \section{More concepts}
 
@@ -20,7 +25,8 @@ such as \cpp{gpu_selector}, \cpp{host_selector}, \cpp{opencl_selector}, and \cpp
 One can also implement its own subclasses that specify to the runtime how to perform device selection.
 For example, it may query the amount of memory on the GPGPU and if it is sufficient, 
 use GPGPU. If it were not sufficient, it could use CPU as a fallback. 
-There, one overrides \cpp{int operator()(const sycl::device& dev) const override}
+
+In a \cpp{device_selector}, one overrides \cpp{int operator()(const sycl::device& dev) const override}
 and returns an integer for the priority. The higher integer, the higher priority. 
 
 \subsection{Queues}
@@ -33,6 +39,7 @@ A key method is \cpp{queue.submit},
 which passes a ``command group'' for asynchronous execution. 
 
 A command group is, essentially, composed of a set of requirements and actual commands executing a kernel. 
+\emph{ELABORATE!}
 The kernel then receives a ``command group handler'' from the SYCL as its argument,
 and uses it to access the API. 
 A command group submission to the group is atomic.  
@@ -181,7 +188,7 @@ If you target, e.g., common OpenCL variants:
 \begin{codebox}[]{}
 \footnotesize Linking SYCL against OpenCL.
 \tcblower
-\cppfile{code_examples/sycl/link1.cpp}
+\cppfile{code_examples/sycl/link1.cmake}
 \end{codebox}
 
 If you target MKL:
@@ -190,7 +197,7 @@ If you target MKL:
 \begin{codebox}[]{}
 \footnotesize Linking SYCL against MKL.
 \tcblower
-\cppfile{code_examples/sycl/link2.cpp}
+\cppfile{code_examples/sycl/link2.cmake}
 \end{codebox}
 
 If you target CUDA (or NVIDIA OpenCL), you may need to set up paths to CUDA, in addition to the use of:
@@ -201,8 +208,11 @@ If you target CUDA (or NVIDIA OpenCL), you may need to set up paths to CUDA, in 
 
 Similarly for AMD:
 
-\begin{verbatim}
--fsycl -fsycl-targets=amdgcn-amd-amdhsa -Xsycl-target-backend –offload-arch=gfx906
-\end{verbatim}
+\raggedbottom
+\begin{codebox}[]{}
+\footnotesize Linking SYCL against AMD.
+\tcblower
+\cppfile{code_examples/sycl/link4.cmake}
+\end{codebox}
 
 For details of the use of SYCL with CUDA, see \url{https://github.com/codeplaysoftware/SYCL-For-CUDA-Examples}
