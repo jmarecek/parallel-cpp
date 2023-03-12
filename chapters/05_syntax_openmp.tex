@@ -12,6 +12,7 @@ Prime implementations include
 \item libomp for clang, and 
 \item liomp5 (IOMP) for ICC/Clang.
 \end{itemize} 
+There is also a ``subprime'' implementation available in Microsoft Visual Studio 2019 (version 16.9), which has its own OpenMP runtime (\cpp{/openmp}) and an experimental support (\cpp{/openmp:llvm}) for the clang/llvm OpenMP runtime, in both cases at version 2.0. 
 
 OpenMP specifies preprocessor directives (pragmas) and a library of functions exported via \cpp{omp.h}.
 Ideally, one and the same program written with OpenMP should be possible to run as serial code, or with any number of threads. 
@@ -167,38 +168,6 @@ from which we took the first example and to \url{https://www.openmp.org/wp-conte
 
 \section{Synchronisation Primitives}
 
-\subsection{Barrier}
-
-OpenMP provides a straightforward, explicit barrier construct:
-
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/qK53jYonK}{\ExternalLink}}
-\footnotesize An example of the use of a barrier.
-\tcblower
-\cppfile{code_examples/openmp/barrier1.cpp}
-\end{codebox}
-
-Especially with nested parallel regions, the behaviour can be quite non-trivial.
-All threads of the current team must complete execution of all tasks bound to the same parallel region prior to continuing past the barrier. What is the current team, however, e.g., whether it is created by the innermost enclosing parallel region,
-depends on the settings of the nesting:
-
-\raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/eb7n975ea}{\ExternalLink}}
-\footnotesize An example of the use of a barrier, whose study is left as an exercise.
-\tcblower
-\cppfile{code_examples/openmp/barrier2.cpp}
-\end{codebox}
-
-Barrier is also implied by the entry and exit in \cpp{parallel} regions.
-There is also an implicit barrier at the end of a \cpp{for}, \cpp{sections}, \cpp{scope}, and \cpp{workshare} constructs, unless one explicitly adds a \cpp{nowait} clause.
-
-\subsection{Fences and Flushes}
-
-Close to a memory fence, the \cpp{flush} construct provides point at which a thread is guaranteed to
-have a consistent view of memory, similar to a fence. 
-
-The \cpp{flush} is also implied by the entry and exit in parallel regions, critical regions, operations with locks etc. 
-
 \subsection{Atomic Variables}
 
 OpenMP has a rich support for atomic variables. 
@@ -266,6 +235,39 @@ for which we cannot use reductions:
 \end{codebox}
 
 The use of critical sections does come with a substantial penalty in terms of performance, though. 
+
+\subsection{Barrier}
+
+OpenMP provides a straightforward, explicit barrier construct:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/qK53jYonK}{\ExternalLink}}
+\footnotesize An example of the use of a barrier.
+\tcblower
+\cppfile{code_examples/openmp/barrier1.cpp}
+\end{codebox}
+
+Especially with nested parallel regions, the behaviour can be quite non-trivial.
+All threads of the current team must complete execution of all tasks bound to the same parallel region prior to continuing past the barrier. What is the current team, however, e.g., whether it is created by the innermost enclosing parallel region,
+depends on the settings of the nesting:
+
+\raggedbottom
+\begin{codebox}[]{\href{https://godbolt.org/z/eb7n975ea}{\ExternalLink}}
+\footnotesize An example of the use of a barrier, whose study is left as an exercise.
+\tcblower
+\cppfile{code_examples/openmp/barrier2.cpp}
+\end{codebox}
+
+Barrier is also implied by the entry and exit in \cpp{parallel} regions.
+There is also an implicit barrier at the end of a \cpp{for}, \cpp{sections}, \cpp{scope}, and \cpp{workshare} constructs, unless one explicitly adds a \cpp{nowait} clause.
+
+\subsection{Fences and Flushes}
+
+Close to a memory fence, the \cpp{flush} construct provides point at which a thread is guaranteed to
+have a consistent view of memory, similar to a fence. 
+
+The \cpp{flush} is also implied by the entry and exit in parallel regions, critical regions, operations with locks etc. 
+
 
 \section{Algorithms}
 
