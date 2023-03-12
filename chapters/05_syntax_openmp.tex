@@ -12,7 +12,8 @@ Prime implementations include
 \item libomp for clang, and 
 \item liomp5 (IOMP) for ICC/Clang.
 \end{itemize} 
-There is also a ``subprime'' implementation available in Microsoft Visual Studio 2019 (version 16.9), which has its own OpenMP runtime (\cpp{/openmp}) and an experimental support (\cpp{/openmp:llvm}) for the clang/llvm OpenMP runtime, in both cases at version 2.0. 
+There are also two ``subprime'' implementation available in Microsoft Visual Studio, which has its own OpenMP runtime (\cpp{/openmp}) and an experimental support (\cpp{/openmp:llvm}) for the clang/llvm OpenMP runtime, in both cases at version 2.0. If you wish to use Microsoft Visual Studio, notice that Intel oneAPI release 2023.0 oficially supports Microsoft Visual Studio 
+2022.
 
 OpenMP specifies preprocessor directives (pragmas) and a library of functions exported via \cpp{omp.h}.
 Ideally, one and the same program written with OpenMP should be possible to run as serial code, or with any number of threads. 
