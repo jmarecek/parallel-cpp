@@ -10,7 +10,7 @@ If you want to learn more about SYCL, see
 SYCL is a high-level specification, in that it builds on top of two lower-level standards, while aiming for succinct, modern C++ code, without any language extensions. First, SYCL is built on top of OpenCL and its device and execution models. Second, SYCL shares the intermediate representation of kernels, known as SPIR(-V), with OpenGL and Vulkan. 
 SYCL aims to bring performance portability across various accelerators. 
 
-In the text, we omit the \cpp{sycl} namespace, where there is no risk of confusion, just as we have omitted the \cpp{std} earlier. The difficulty 
+In the text, we omit the \cpp{sycl} namespace, where there is no risk of confusion, just as we have omitted the \cpp{std} earlier.
 
 \section{Motivation}
 
@@ -55,7 +55,7 @@ The code is also clearly modern C++, and can target accelerators by a number of 
 \section{More concepts}
 
 To make as efficient use of GPGPUs as possible, SYCL utilizes a number of concepts that 
-we have not seen earlier.
+we have not seen earlier. This builds upon the discussion of the GPGPU architecture in Section \ref{sec:GPGPUs}, page \pageref{sec:GPGPUs}.
 
 \subsection{Device selector}
 
