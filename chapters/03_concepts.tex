@@ -103,7 +103,30 @@ Most modern computers utilize complicated cache hierarchies. One may have 32 KB 
 
 Crucially, the times above are the best-case performance. To understand the worst-case performance, one needs to understand cache snooping (with a write-invalidate protocol). Most modern cores monitor a stream of memory loads and stores across the whole shared-memory machine. If a transaction concerns store in a block cached on the core (processor), the core sets some ``invalid'' flag to the block in its cache. If the core wishes to read a block with the ``invalid'' flag, it will ask all other cores for a valid value. Obtaining the correct value takes time. 
 
-As we will see in the distributed-memory part of the course, one can also maintain the coherence otherwise, which is known as the  directory-based coherency mechanism. Either way, cache coherence defines the requirements on concurrent reads and writes to the same address. To some extent, it masks the presence of cache hierarchies in any modern computing system. 
+As we will see in the distributed-memory part of the course, one can also maintain the coherence otherwise, which is known as a directory-based coherency mechanism. Either way, cache coherence defines the requirements on concurrent reads and writes to the same address. To some extent, it masks the presence of cache hierarchies in any modern computing system. 
+
+\subsection{GPGPUs}
+
+As we have mentioned in the introduction, the bulk of the computational performance of most modern computing system (from a mobile phone to a supercomputer) is in its GPGPUs. Let us briefly consider a particular example of the NVIDIA Ampere architecture of GeForce RTX 3080 or NVIDIA A100:
+\begin{itemize}
+\item There are seven Graphics Processing Clusters (GPCs), sharing up to 40 MB of L2 cache and up to 40 GB of high-speed HBM2 memory 
+\item Within each GPC, there are 12 Streaming Multiprocessors (SMs), 
+\item Within each SM, there are 128 cores working with single-precision floating-point (FP32) precision and two double-precision (FP64) units. There is also 128 KB of L1/Shared Memory, shared across the 128 cores. 
+\item Each SM is partitioned into four processing blocks (or partitions), each with a few kilobytes of L0 instruction cache and one warp scheduler.
+\end{itemize}
+Altogether, A100 has $7 \cdot 12 \cdot 128 = 10752$ cores, but their use is rather constrained. 
+%The code is translated from CUDA C or C++ to Parallel Thread Execution (PTX), an intermediate representation, and subsequently to a proprietary assembly language (SASS). 
+
+Similar to the CPU, the GPU hence has a memory hierarchy:
+\begin{itemize}
+\item L1 cache with 33 cycle latency and shared memory with even lower latency, based on microbenchmarking \cite{9926299} 
+\item L2 cache with up to 2080	 GB/s read bandwidth (200 cycle latency), based on microbenchmarking \cite{9926299} 
+\item on-board HBM2 memory with 1555 GB/sec bandwidth (290 cycle latency)
+\item intra-board NVLink with 50 Gb/sec per signal pair bandwidth
+\item access to RAM via PCI Express Gen 4 (PCIe Gen 4) at 31.5 GB/sec
+\item optionally, intra-node communication at 200 Gbit/sec using InfiniBand.
+\end{itemize}
+The interaction of the GPGPU memory hierarchy and CPU memory hierarchy is non-trivial, but summarized by the suggestion to reduce the number of loads. 
 
 \subsection{Memory order}
 

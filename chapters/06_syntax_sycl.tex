@@ -106,11 +106,12 @@ we pass a C++ function object as a parameter and have it executed once.
 Kernel can also be a class that overloads operator (), e.g. \cpp{void operator()(id<1> idx)}.
 
 Most often, we want the kernel executed many times, in a data-parallel fashion. 
-In the so-called nd-ranges, we partition the index-set of a data set hierarchically first into into global ranges, and then into local ranges. 
+In the so-called nd-ranges (``kernel grid'' on NVIDIA), we partition the index-set of data hierarchically first into into global ranges, and then into local ranges. 
 The local range corresponds to a work-group and each element corresponds to a work item (= single run of a kernel). 
-Typically, all work items within a work group are executed in lock step (i.e., the same hardware instruction in all work items at the same time).
+Indeally, all work items within a work group are executed in lock step (i.e., the same hardware instruction in all work items at the same time).
 The work-group local memory can often be accessed very efficiently, via \cpp{local_accessor }, and can be used to coordinate multiple work items (= single runs) within a work group.
-%On the other hand, work-groups are independent of each other there is no way to synchronize write access between two work items in two distinct work groups in a single kernel. 
+
+The threads of one work group (``thread block'' on NVIDIA) are sent to one Streaming Multiprocessors (SM), but one SM can execute threads by multiple work group in its multiple processing blocks. At most one work group per processing block.
 
 To summarize, each work item can access:
 \begin{itemize}
