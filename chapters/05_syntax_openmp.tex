@@ -50,8 +50,8 @@ The construct can take a number of modifiers, including:
 \item \cpp{num_threads}: number of threads to use in the team
 \item \cpp{private}(list of variables): those variables will be private to each thread 
 \item \cpp{firstprivate}(list of variables): those variables will be private to each thread, but initially their value will be copied from the master thread using the default copy constructor. 
-item \cpp{lastprivate}(list of variables): those variables will be private to each thread, but at the end, their value will be copied to the master thread using the default copy constructor. 
-\item \cpp{shared}(list of variables): these variables will be shared between the master thread and all threads in the new team. It is the programmers responsibility to keep the variables constructed as long as the parallel region is running
+\item \cpp{lastprivate}(list of variables): those variables will be private to each thread, but at the end, their value will be copied to the master thread using the default copy constructor. 
+\item \cpp{shared}(list of variables): these variables will be shared between the master thread and all threads in the new team. It is the programmer's responsibility to keep the variables constructed as long as the parallel region is running
 \item \cpp{default}: values of \cpp{private}, \cpp{firstprivate}, \cpp{shared}, \cpp{none} suggest what should be the default behaviour for variables not listed above. The default is \cpp{shared}, which is suboptimal from both performance and thread-safety perspective. It is wise to issue \cpp{default(none)}. 
 \item \cpp{reduction}(reduction-identifier : list) suggests that variables in list should be treated as shared, when they are used by the function \cpp{reduction-identifier}, which could also take the special values of $+, -, *, \&, |, ^, ||, \max, \min$. The list can include array elements and, when \cpp{reduction-identifier} is a static function of a class, accessible data objects of the object. \label{sec:reduction1}
 \item \cpp{proc_bind}: values of \cpp{master} and \cpp{close} and \cpp{spread} suggest how far from the master thread should be executed the new threads (same core, close in non-uniform architectures, as far as possible in non-uniform architectures).
@@ -68,8 +68,6 @@ See, for example:
 \tcblower
 \cppfile{code_examples/openmp/parallel2.cpp}
 \end{codebox}
-
-Since version 5.0, one can also utilize the \cpp{teams} construct on its own, optionally with a target (such a GPGPU). 
 
 \subsection{Threads and their Sizing}
 
@@ -119,7 +117,7 @@ The closest to a coroutine in OpenMP is the concept of a task. While it does not
 \subsection{Kernels}
 
 There is a nascent support for the use of GPGPUs via \cpp{target} construct.
-While the block following the target construct can be arbitrary, in principle, most GPUs are not able to support arbitrary code. Specifically, there are usually no synchronization primitives available and no coherence among L1 caches. Often, block requiring anything beyond the basic arithmetics will execute only on one core (``stream multiprocessor'') of the GPGPU. Ideally, one should combine the offloading of the code to the GPGU (via the target), across multiple cores (via teams construct), and then across the code. This can get quite non-trivial:
+While the block following the target construct can be arbitrary, in principle, most GPUs are not able to support arbitrary code. Specifically, there limitations on the use of synchronization primitives and coherence among L1 caches. Ideally, one should combine the offloading of the code to the GPGU (via the target), across multiple partitions (via teams construct) etc. This can get quite non-trivial:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/TM5WjPvT9}{\ExternalLink}}
@@ -135,8 +133,8 @@ While the block following the target construct can be arbitrary, in principle, m
 \cppfile{code_examples/openmp/target2.h}
 \end{codebox}
 
-We could also use the nowait clause to make the target constructs asynchronous, resembling other OpenMP tasks,
-but that does not match the ``lockstep'' execution on the GPGPUs. 
+We could also use \cpp{nowait} as in other OpenMP constructs, but that does not match the ``lockstep'' execution on the GPGPUs. 
+Since version 5.0, one can also utilize the \cpp{teams} construct on its own, optionally with a target (such a GPGPU). 
 
 The advantage is that from the ``top-level perspective'', the use of the example above remains standard: 
 
@@ -156,7 +154,7 @@ Compiling OpenMP with offloading is non-trivial. As has been mentioned in the in
 
 \begin{itemize}
 \item NVIDIA CUDA Compiler Driver NVCC may be the easiest to use with NVIDIA hardware. For A100 of the RCI cluster, use cc80: \verb|nvcc –mp=gpu -gpu=cc80|
-\item clang/LLVM compilers uses \verb|clang++ -fopenmp -fopenmp-targets=<target triple>| where the triple is documented at \url{https://llvm.org/doxygen/Triple_8h_source.html} such as \verb|clang++ -fopenmp -fopenmp-targets=nvptx64 -O3|
+\item clang/LLVM compilers use \verb|clang++ -fopenmp -fopenmp-targets=<target triple>| where the triple is documented at \url{https://llvm.org/doxygen/Triple_8h_source.html} such as \verb|clang++ -fopenmp -fopenmp-targets=nvptx64 -O3|
 \item AMD ROC is built on top of Clang, so starting with \verb|clang -fopenmp -offload-arch=gfx908| is a good idea. In more detail,  
 \verb|-target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=<gpu-arch>|
 \item Intel Compiler Collection is, since 2021, also built on top of Clang, except still uses the Intel OpenMP library, so you start with \verb|icx -fiopenmp -fopenmp-targets=<target triple>|. Intel has support for \verb|spir64| and \verb|spirv64| architectures, as well as the above.
