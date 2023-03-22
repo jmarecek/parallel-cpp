@@ -43,7 +43,7 @@ Note that this market is rapidly declining.
 
 In this chapter, we hence consider SYCL, where the same example would resemble:
 
-\raggedbottom
+\ragged-bottom
 \begin{codebox}[]{}
 \footnotesize SAXPY in SYCL, the open specification.
 \tcblower
@@ -82,7 +82,7 @@ which passes a `` command group function object'' for asynchronous execution.
 At the simplest, a command group'' is a callable (a named type, a lambda function, or std::function), which receives a ``command group handler'' from the SYCL as an argument of \cpp{operator()} so as to access the API. 
 A command group submission to the queue is atomic.  
 
-A command group objects may also combine the callable and a set of requirements (edges of a task-graph), but if declare the accessors for memory access correctly (see below), the task-graph will be constructed based on the accessors. 
+A command group objects may also combine the callable and a set of requirements (edges of a task-graph), but if one declares the accessors for memory access correctly (see below), the task-graph will be constructed based on the accessors. 
 
 Asynchronous execution also means an undefined order of execution, 
 unless we use \cpp{wait} or suggest the dependencies between the ``actions'' in the form of a task graph.
@@ -99,7 +99,7 @@ Within an action submitted to the queue, we execute kernels.
  \item receiving an index to the run of the kernel as \cpp{auto idx} or \cpp{id<1> idx} or similar.
  \item returning nothing; with \cpp{void} return type 
  \item which cannot allocate memory dynamically
- \itme which cannot use certain other features (e.g., RTTI). 
+ \item which cannot use certain other features (e.g., RTTI). 
 \end{itemize}
 Within the \cpp{single_task function} method of the ``command group handler'' API, 
 we pass a C++ function object as a parameter and have it executed once. 
@@ -108,7 +108,7 @@ Kernel can also be a class that overloads operator (), e.g. \cpp{void operator()
 Most often, we want the kernel executed many times, in a data-parallel fashion. 
 In the so-called nd-ranges (``kernel grid'' on NVIDIA), we partition the index-set of data hierarchically first into into global ranges, and then into local ranges. 
 The local range corresponds to a work-group and each element corresponds to a work item (= single run of a kernel). 
-Indeally, all work items within a work group are executed in lock step (i.e., the same hardware instruction in all work items at the same time).
+Ideally, all work items within a work group are executed in lock step (i.e., the same hardware instruction in all work items at the same time).
 The work-group local memory can often be accessed very efficiently, via \cpp{local_accessor }, and can be used to coordinate multiple work items (= single runs) within a work group.
 
 The threads of one work group (``thread block'' on NVIDIA) are sent to one Streaming Multiprocessors (SM), but one SM can execute threads by multiple work group in its multiple processing blocks. At most one work group per processing block.
@@ -138,7 +138,7 @@ See \url{https://www.codingame.com/playgrounds/48226/introduction-to-sycl/error-
   
 \subsection{Unified shared memory}
  
-At the cost of some latency, one can use a unified shared memory across both the host and the device, wherein oneuses the same pointer on both the host and the device. This requires:
+At the cost of some latency, one can use a unified shared memory across both the host and the device, wherein one uses the same pointer on both the host and the device. This requires:
  
 \cpp{
 template <typename T>
