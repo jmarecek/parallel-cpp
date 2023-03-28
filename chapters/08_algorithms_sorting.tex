@@ -1,7 +1,87 @@
-\section{Sorting}
-Before we talk about sorting, we need to discuss what the standard requires for types to be comparable—specifically, the \cpp{strict_weak_ordering} required by sorting algorithms.
+\chapter{Use Case 1: Sorting}
 
-\index{\cpp{strict_weak_ordering}}
+In the first chapter, we have seen that within shared-memory parallel programming, we have broadly four options:
+\begin{itemize}
+\item Confinement: Do not share memory between threads. 
+\item Immutability: Do not share any mutable data between threads. 
+\item Thread-safe code: Use data types with additional guarantees for storing any mutable data shared between threads, or even better, use implementations of algorithms that are already parallelized and handle the concurrency issues for you. 
+\item Synchronization: Use synchronization primitives to prevent accessing the variable at the same time. 
+\end{itemize}
+
+Let us now explore the latter two options on the use case of sorting. 
+
+\section{Computational Complexity}
+
+A large part of theoretical computer science is devoted to the study of the limitations of parallelizability of algorithms, starting with the very clear question: does every problem 
+with a polynomial-time sequential algorithm also have a parallelizable polynomial-time algorithm? In short, the answer is no. 
+
+Let us consider the P-Complete problems \cite{greenlaw1995limits}, i.e.,  decision problems that are in P and where every problem in P can be reduced to the P-Complete problem in logarithmic space (L). The prime examples of  P-Complete problems are 
+\begin{itemize} 
+\item circuit evaluation: given a Boolean circuit and an input, decide what the circuit outputs
+\item linear programming: given a linear function subject to linear inequality constraints, find the optimum of the linear function
+\item many graph problems, such as Lexicographically First Depth-first Search Ordering (LFDFS):
+given an undirected graph with fixed ordered adjacency lists, and two designated vertices $u$ and $v$, is vertex $u$ visited before vertex $v$ in the depth-first search of the graph?
+\item many compression algorithms: given strings $s$ and $t$, will compressing $s$ with LZ78 add $t$ to the dictionary?
+\item many problems related to Markov decision processes: is the minimum expected cost over all policies equal to 0 (for both finite, and long-run versions). 
+\item many tests of local optimality in combinatorial optimization: in an instance of Traveling Salesman, and a sequence of tours, is this a 2-Opt sequence? 
+\end{itemize} 
+Therein, we cannot hope for efficient solution on a parallel computer in the sense of solving in time $O(log^c n)$ using $O(n^k)$ parallel processors for some constants $c$ and $k$. 
+
+In contrast, Nick's class NC$^{c}$ are decision problems solvable by a uniform family of Boolean circuits with polynomial size, depth $O(log^c(n))$, and fan-in 2. More usefully, a problem in NC with input of length $n$ can be solved in time $O(log^c n)$ using $O(n^k)$ parallel processors for some  constants $c$ and $k$. (Notice that for a constant $k$, $O(n^k)$ is a polynomial.) Thus, NC can be thought of as problems that can be efficiently solved on a parallel computer. Integer arithmetics (addition, multiplication and division), matrix arithmetics (multiplication, determinant, inverse, rank), or multiple graph problems (shortest path, maximal matching with some restrictions on the weights) are in Nick's class and hence ``easier'' than P-Complete problems. 
+
+As Table \ref{ch08:examples} suggests, sorting is Nick's class: for $n$ items, we can consider $O(n^2)$ pairs of items in parallel, compare them to obtain a binary value, and then for each item, obtain its rank in the sorted order by adding the binary values. This is known as the parallel ranking. There are many other parallel algorithms based on picking minimum and maximum from a small set, as well as algorithms based on hashing.
+
+\begin{table}[h!]
+\begin{tabular}{lll}
+Algorithm                          & $p(n)$ Processors  & Time \\
+\hline
+Sequential algorithms              & 1                  & $O(n \log n)$ \\
+Parallel divide and conquer        & $O(1)$             & $O(n \log n)$ \\
+                                   & $O(\log n)$        & $O\left(\frac{n(\log n)}{p(n)}\right)$ \\
+                                   & $\omega(\log n)$   & $O(n)$ \\
+Parallel Ranking                   & $O(n^2)            & $O(\log n)$
+\end{tabular}
+\caption{Parallelisability of common sorting algorithms, following \cite{greenlaw1995limits}.}
+\label{ch08:examples}
+\end{table}
+
+
+\section{Thread-safe Code in C++20}
+
+A prime example of the use of thread-safe code in C++ is the standard template library (STL) with a suitable execution policy. We have seen the the header \cpp{execution} defines objects \cpp{std::execution::seq}, \cpp{std::execution::par}, \cpp{std::execution::par_unseq}, which can be passed as the first argument of any standard algorithm, e.g., \\
+\cpp{std::vector<int> my_data; std::sort(std::execution::par,my_data.begin(),my_data.end());}
+
+\begin{codebox}[breakable]{}
+\footnotesize Example of parallel sorting in STL.
+\tcblower
+\cppfile{code_examples/sort/sort_first.cpp}
+\end{codebox}
+
+Now, knowing what your implementation of standard template library (STL) would actually use is non-trivial. One may imagine a code such as:
+
+\begin{codebox}[breakable]{}
+\footnotesize Example of a quick sort using STL.
+\tcblower
+\cppfile{code_examples/sort/sort_qs_stl.h}
+\end{codebox}
+
+In the Intel Thread Building Blocks (TBB) backend of the GCC implementation, you would actually find: 
+
+\begin{codebox}[breakable]{\href{https://github.com/gcc-mirror/gcc/blob/16e2427f50c208dfe07d07f18009969502c25dc8/libstdc%2B%2B-v3/include/pstl/algorithm_impl.h#L2107}{\ExternalLink}}
+\footnotesize Example of parallel sorting implementation in STL, from pstl/algorithm\_impl.h of GCC.
+\tcblower
+\cppfile{code_examples/sort/sort_gcc_impl.h}
+\end{codebox}
+
+This uses a ``sorting based on task tree and parallel merge'', while making use of several non-trivial tricks, including \cpp{tbb::task_scheduler_init}, \cpp{std::thread::hardware_concurrency()}, and \cpp{std::hardware_constructive_interference_size}. (Contrast this with the serial version of GCC sort, which uses a multi-way mergesort, and GCC stable\_sort, which uses a quicksort.) We wish to make use of the STL, rather than redevelop it, in the first instance. 
+
+% https://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size
+
+Even making full use of the STL quite non-trivial. Here, we present an overview of the sorting-related routines in verbatim from the fantastic book ``A Complete Guide to Standard C++ Algorithms'' of Simon Toth \cite{toth2023}, in compliance with the license. 
+
+\subsection{\cpp{strict_weak_ordering}}
+
+First, however, let us introduce the \cpp{strict_weak_ordering} ``comparator'' required, following the material of Simon Toth.
 Implementing a \cpp{strict_weak_ordering} for a custom type at minimum requires providing an overload of \cpp{operator<} with the following behaviour:
 
 \begin{itemize}
@@ -12,7 +92,7 @@ Implementing a \cpp{strict_weak_ordering} for a custom type at minimum requires 
 
 A good default for a \cpp{strict_weak_ordering} implementation is lexicographical ordering. Lexicographical ordering is also the ordering provided by standard containers.
 
-Since C++20 introduced the spaceship operator, user-defined types can easily access the default version of lexicographical ordering.
+C++20 introduced the spaceship operator, whereby user-defined types can easily access the default version of lexicographical ordering.
 
 \begin{codebox}[breakable]{\href{https://compiler-explorer.com/z/7PjY8fc1G}{\ExternalLink}}
 \footnotesize Example of three approaches to implementing lexicographical comparison for a custom type.
@@ -79,7 +159,7 @@ The type depends on the type returned by the elements' spaceship operator.
 \subsection{\texorpdfstring{\cpp{std::sort}}{\texttt{std::sort}}}
 \index{\cpp{std::sort}}
 
-The \cpp{std::sort} algorithm is the canonical $O(n\log n)$ sort (typically implemented as intro-sort).
+The \cpp{std::sort} algorithm is the canonical $O(n\log n)$ sort.
 
 \cppversions{\texttt{sort}}{\CC98}{\CC20}{\CC17}{\CC20}
 \constraints{\cpp{random_access_range}}{\cpp{random_access_range}}{\cpp{operator<}}{\cpp{strict_weak_ordering}}
@@ -182,21 +262,92 @@ The consequence of writing output to a second range is that the source range doe
 \cppfile{code_examples/algorithms/partial_sort_copy_code.h}
 \end{codebox}
 
-\subsection{\texorpdfstring{\cpp{qsort}}{\texttt{qsort}} - C standard library}
-\index{\cpp{qsort}}
+\section{Synchronization}
 
-Because the C standard library is part of the C++ standard library, we also have access to \cpp{qsort}.
+Let us now use synchronization primitives to implement simple sorting algorithms. 
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/Y4E63aThP}{\ExternalLink}}
-\footnotesize Example of using \cpp{qsort} to sort an array of integers.
+\subsection{Quick sort with user-level threads}
+
+For instance, let us consider quick-sort, for a start:
+
+\begin{codebox}[breakable]{}
+\footnotesize An example of parallel quick sort in OpenMP.
 \tcblower
-\cppfile{code_examples/algorithms/qsort_code.h}
+\cppfile{code_examples/sort/sort_qs.h}
 \end{codebox}
 
-I would strongly recommend avoiding \cpp{qsort}, as \cpp{std::sort} and \cpp{std::ranges::sort} should be a better choice in every situation. Moreover, \cpp{qsort} is only valid for trivially copyable types, and those will correctly optimize to \cpp{memcpy} / \cpp{memmove} operations even when using \cpp{std::sort}.
+Intel suggests a three-way quick-sort (\url{https://software.intel.com/content/www/us/en/develop/articles/an-efficient-parallel-three-way-quicksort-using-intel-c-compiler-and-openmp-45-library.html
+}) using the task construct:
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/nT9GPh8Tq}{\ExternalLink}}
-\footnotesize Example of using \cpp{std::sort} to achieve the same result as in the previous example.
+\begin{codebox}[breakable]{}
+\footnotesize An example of three-way parallel quick sort in OpenMP.
 \tcblower
-\cppfile{code_examples/algorithms/qsort_not_code.h}
+\cppfile{code_examples/sort/sort_qs3w.h}
 \end{codebox}
+
+\subsection{Merge sort with user-level threads}
+
+Similarly, one could parallelize merge sort. Let us consider a simple merge sort:
+
+\begin{codebox}[breakable]{}
+    \footnotesize An example of merge sort.
+    \tcblower
+    \cppfile{code_examples/sort/sort_merge1.h}
+    \end{codebox}
+
+Using the task construct in OpenMP, we can parallelize this as:
+
+    \begin{codebox}[breakable]{}
+        \footnotesize An example of merge sort in OpenMP.
+        \tcblower
+        \cppfile{code_examples/sort/sort_merge2.h}
+        \end{codebox}
+
+These examples of quick sort and merge sort are actually competitive. 
+ On GPGPUs, one may wish to consider Odd-Even Merge Sort:
+
+ \begin{codebox}[breakable]{}
+    \footnotesize An example of odd-even merge sort.
+    \tcblower
+    \cppfile{code_examples/sort/sort_merge3.h}
+    \end{codebox}
+
+which could be vectorized:
+
+\begin{codebox}[breakable]{}
+    \footnotesize An example of vectorized odd-even merge sort.
+    \tcblower
+    \cppfile{code_examples/sort/sort_merge4.h}
+    \end{codebox}
+
+See \url{https://xhad1234.github.io/Parallel-Sort-Merge-Join-in-Peloton/} for a state-of-the-art implementation. 
+
+\subsection{Bubble sort with vectorisation}
+
+One may wish to ``do better'' by considering alternative algorithms and alternative synchronisation primitives. Quite possibly the simplest sorting algorithm is the bubble sort: 
+
+\begin{codebox}[breakable]{}
+\footnotesize An example of bubble sort.
+\tcblower
+\cppfile{code_examples/sort/sort_bubble1.h}
+\end{codebox}
+
+This can be parallelized with OpenMP:
+
+\begin{codebox}[breakable]{}
+\footnotesize An example of bubble sort in OpenMP.
+\tcblower
+\cppfile{code_examples/sort/sort_bubble2.h}
+\end{codebox}
+
+\subsection{Sample sort}
+ 
+% GCC C++ PSTL, Intel Thread Building Blocks: “sorting based on task tree and parallel merge”
+
+Another alternative is to consider sample sort. This is implemented in Boost 
+(\url{https://www.boost.org/doc/libs/develop/libs/sort/doc/html/sort/parallel.html}), 
+and as with many ideas implemented in Boost, this is a great idea. 
+
+
+%Vektorizované algoritmy založené na výběru minima a maxima
+%Algoritmy založené na hashování
