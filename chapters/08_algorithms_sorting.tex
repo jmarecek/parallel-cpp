@@ -13,7 +13,7 @@ Let us now explore the latter two options on the use case of sorting.
 \section{Computational Complexity}
 
 A large part of theoretical computer science is devoted to the study of the limitations of parallelizability of algorithms, starting with the very clear question: does every problem 
-with a polynomial-time sequential algorithm also have a parallelizable polynomial-time algorithm? In short, the answer is no. 
+with a polynomial-time sequential algorithm also have an efficient parallel algorithm? In short, the answer is no. 
 
 Let us consider the P-Complete problems \cite{greenlaw1995limits}, i.e.,  decision problems that are in P and where every problem in P can be reduced to the P-Complete problem in logarithmic space (L). The prime examples of  P-Complete problems are 
 \begin{itemize} 
@@ -48,7 +48,7 @@ Parallel Ranking                   & $O(n^2)            & $O(\log n)$
 
 \section{Thread-safe Code in C++20}
 
-A prime example of the use of thread-safe code in C++ is the standard template library (STL) with a suitable execution policy. We have seen the the header \cpp{execution} defines objects \cpp{std::execution::seq}, \cpp{std::execution::par}, \cpp{std::execution::par_unseq}, which can be passed as the first argument of any standard algorithm, e.g., \\
+A prime example of the use of thread-safe code in C++ is the standard template library (STL) with a suitable execution policy. We have seen that the header \cpp{execution} defines objects \cpp{std::execution::seq}, \cpp{std::execution::par}, \cpp{std::execution::par_unseq}, which can be passed as the first argument of any standard algorithm, e.g., \\
 \cpp{std::vector<int> my_data; std::sort(std::execution::par,my_data.begin(),my_data.end());}
 
 \begin{codebox}[breakable]{}
@@ -78,7 +78,7 @@ This uses a ``sorting based on task tree and parallel merge'', while making use 
 
 % https://en.cppreference.com/w/cpp/thread/hardware_destructive_interference_size
 
-Even making full use of the STL quite non-trivial. Here, we present an overview of the sorting-related routines in verbatim from the fantastic book ``A Complete Guide to Standard C++ Algorithms'' of Simon Toth \cite{toth2023}, in compliance with the license. 
+Even making full use of the STL is quite non-trivial. Here, we present an overview of the sorting-related routines in verbatim from the fantastic book ``A Complete Guide to Standard C++ Algorithms'' of Simon Toth \cite{toth2023}, in compliance with the license. 
 
 \subsection{\cpp{strict_weak_ordering}}
 
@@ -92,11 +92,12 @@ Implementing a \cpp{strict_weak_ordering} for a custom type at minimum requires 
 \end{itemize}
 
 A good default for a \cpp{strict_weak_ordering} implementation is lexicographical ordering. Lexicographical ordering is also the ordering provided by standard containers.
-
 C++20 introduced the spaceship operator, whereby user-defined types can easily access the default version of lexicographical ordering.
 
+\emph{C++20 does not enforce that the comparator is thread safe, although that matters greatly for the thread-safe nature of the whole sorting algorithm!}
+
 \begin{codebox}[breakable]{\href{https://compiler-explorer.com/z/7PjY8fc1G}{\ExternalLink}}
-\footnotesize Example of three approaches to implementing lexicographical comparison for a custom type.
+\footnotesize Example of three approaches to implementing lexicographical comparison for a custom type \emph{that are not thread safe!}.
 \tcblower
 \cppfile{code_examples/theory/comparable_code.h}
 \end{codebox}
@@ -165,7 +166,7 @@ The \cpp{std::sort} algorithm is the canonical $O(n\log n)$ sort.
 \cppversions{\texttt{sort}}{\CC98}{\CC20}{\CC17}{\CC20}
 \constraints{\cpp{random_access_range}}{\cpp{random_access_range}}{\cpp{operator<}}{\cpp{strict_weak_ordering}}
 
-Due to the $O(n\log n)$ complexity guarantee, \cpp{std::sort} only operates on \cpp{random_access} ranges. Notably, \cpp{std::list} offers a method with an approximate $n\log n$ complexity.
+Due to the $O(n\log n)$ complexity guarantee, \cpp{std::sort} only operates on \cpp{random_access} ranges. Notably, \cpp{std::list} offers a method with approximately $n\log n$ complexity.
 
 \begin{codebox}[]{\href{https://compiler-explorer.com/z/vef61TWj9}{\ExternalLink}}
 \footnotesize Basic example of using \cpp{std::sort} and \cpp{std::list::sort}.
@@ -239,7 +240,7 @@ The \cpp{std::partial_sort} algorithm reorders the range's elements such that th
 
 \constraints{\cpp{(random_access_range, random_access_iterator)}}{\cpp{(random_access_range, random_access_iterator)}}{\cpp{operator<}}{\texttt{strict\_weak\_ordering}}
 
-The benefit of using a partial sort is faster runtime — approximately $O(n*logk)$, where k is the number of elements sorted.
+The benefit of using a partial sort is faster runtime — approximately $O(n \log k)$, where k is the number of elements sorted.
 
 \begin{codebox}[]{\href{https://compiler-explorer.com/z/j6xjM4GnT}{\ExternalLink}}
 \footnotesize Example of using \cpp{std::partial_sort} to sort the first three elements of a range.
@@ -313,13 +314,20 @@ These examples of quick sort and merge sort are actually competitive.
     \cppfile{code_examples/sort/sort_merge3.h}
     \end{codebox}
 
-which could be vectorized:
+which could be vectorized. Notice that many current compilers are able to vectorize 
+the code for you, without the need to use intrinsics: 
 
 \begin{codebox}[breakable]{}
-    \footnotesize An example of vectorized odd-even merge sort.
+    \footnotesize An example of vectorized subroutine of the odd-even merge sort.
     \tcblower
     \cppfile{code_examples/sort/sort_merge4.h}
     \end{codebox}
+
+    \begin{codebox}[breakable]{}
+        \footnotesize An example of vectorized subroutine of the odd-even merge sort.
+        \tcblower
+        \cppfile{code_examples/sort/sort_merge5.h}
+        \end{codebox}
 
 See \url{https://xhad1234.github.io/Parallel-Sort-Merge-Join-in-Peloton/} for a state-of-the-art implementation. 
 
