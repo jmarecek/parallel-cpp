@@ -95,6 +95,27 @@ As it turns out, the ``context switch'' with user-level threads has a similar co
 
 A \emph{task} is a rather abstract unit of work, e.g., a function, which can be executed by any thread, but often allocated to one of a many threads within a pool. 
 
+
+\section{Computational Complexity}
+
+A large part of theoretical computer science is devoted to the study of the limitations of parallelizability of algorithms, starting with the very clear question: does every problem 
+with a polynomial-time sequential algorithm also have an efficient parallel algorithm? In short, the answer is no. 
+
+Let us consider the P-Complete problems \cite{greenlaw1995limits}, i.e.,  decision problems that are in P and where every problem in P can be reduced to the P-Complete problem in logarithmic space (L). The prime examples of  P-Complete problems are 
+\begin{itemize} 
+\item circuit evaluation: given a Boolean circuit and an input, decide what the circuit outputs
+\item linear programming: given a linear function subject to linear inequality constraints, find the optimum of the linear function
+\item many graph problems, such as Lexicographically First Depth-first Search Ordering (LFDFS):
+given an undirected graph with fixed ordered adjacency lists, and two designated vertices $u$ and $v$, is vertex $u$ visited before vertex $v$ in the depth-first search of the graph?
+\item many compression algorithms: given strings $s$ and $t$, will compressing $s$ with LZ78 add $t$ to the dictionary?
+\item many problems related to Markov decision processes: is the minimum expected cost over all policies equal to 0 (for both finite, and long-run versions). 
+\item many tests of local optimality in combinatorial optimization: in an instance of Traveling Salesman, and a sequence of tours, is this a 2-Opt sequence? 
+\end{itemize} 
+Therein, we cannot hope for efficient solution on a parallel computer in the sense of solving in time $O(log^c n)$ using $O(n^k)$ parallel processors for some constants $c$ and $k$. 
+
+\label{sec:Nicks}
+In contrast, Nick's class NC$^{c}$ are decision problems solvable by a uniform family of Boolean circuits with polynomial size, depth $O(log^c(n))$, and fan-in 2. More usefully, a problem in NC with input of length $n$ can be solved in time $O(log^c n)$ using $O(n^k)$ parallel processors for some  constants $c$ and $k$. (Notice that for a constant $k$, $O(n^k)$ is a polynomial.) Thus, NC can be thought of as problems that can be efficiently solved on a parallel computer. Integer arithmetics (addition, multiplication and division), matrix arithmetics (multiplication, determinant, inverse, rank), or multiple graph problems (shortest path, maximal matching with some restrictions on the weights) are in Nick's class and hence ``easier'' than P-Complete problems. 
+
 \section{Hardware support}
 
 \subsection{Memory hierarchies}
