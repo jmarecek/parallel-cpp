@@ -42,6 +42,14 @@ BLAS and LAPACK subroutines are all named naaop, where:
 \end{itemize}
 SGEMM is thus matrix-matrix multiplication of general dense matrices in single precision,
 and DDOT is vector-vector dot product in double precision.
+See Figure~\ref{blas02png} for an overview. 
+
+\begin{figure}[t!]
+\includegraphics[width=\textwidth]{./static/blas02.png}
+\caption{A summary of the routines in BLAS levels 1 and 2, from the cheat sheet \url{http://www.netlib.org/blas/blasqr.pdf
+}.}
+\label{blas02png}
+\end{figure}
 
 Most vendors of acclerators maintain their own BLAS 
  implementation:
@@ -148,9 +156,19 @@ of common linear-algebraic routines.
 Let us explore matrix-matrix multiplication and 
 solving of linear systems, as two examples. 
 
-\subsection{Matrix Multiplication}
+\subsection{Matrix-Vector Multiplication}
 
 % TODO: Redo examples in SYCL as well!
+
+Matrix-vector multiplication is a key primitive throughout 
+linear algebra. Considering that the computation:
+\begin{align}
+    y_j=\sum_{i} a_{ji} x_i
+\end{align}
+for each coordinate $j$ in the resulting vector $y$,
+can be computed in parallel, independently of any other,
+it is almost embarrassingly (data) parallel. Still,
+there are several important improvements over the basic version:  
 
 \begin{codebox}[breakable]{}
 \footnotesize An example of matrix multiplication in OpenMP.
@@ -158,11 +176,29 @@ solving of linear systems, as two examples.
 \cppfile{code_examples/ml/multiply01_openmp.h}
 \end{codebox}
 
+Notably, one could aim to parallelize the processing of each row
+of the matrix. This is difficult, due to the need for synchronization
+in the addition into the result. 
+One option would be to consider some auxiliary variable $z$,
+which would be computed column-wise:
+
+\begin{align}
+z_{ij} = & a_{ij} x_j\\
+y_i    = & sum_{j} z_ij
+\end{align}
+
+This would be difficult, in terms of the cache hierarchies. 
+We could, however, reorder the memory:
+
 \begin{codebox}[breakable]{}
 \footnotesize An example of matrix multiplication in OpenMP.
 \tcblower
 \cppfile{code_examples/ml/multiply02_openmp.h}
 \end{codebox}
+
+Alternatively, one can use the single most useful 
+and embarrassingly simple trick of parallel programming:
+introducing local variable. 
 
 \begin{codebox}[breakable]{}
 \footnotesize An example of matrix multiplication in OpenMP.
@@ -170,11 +206,20 @@ solving of linear systems, as two examples.
 \cppfile{code_examples/ml/multiply03_openmp.h}
 \end{codebox}
 
+\subsection{Matrix-Matrix Multiplication}
+
+Matrix-matrix multiplication is, likewise, very common and to some extent 
+embarrassingly parallel. For large-enough matrices, the trivial parallelization
+leads to too many small(ish) tasks. 
+
 \begin{codebox}[breakable]{}
 \footnotesize An example of matrix multiplication in OpenMP.
 \tcblower
 \cppfile{code_examples/ml/multiply04_openmp.h}
 \end{codebox}
+
+A more elaborate version considers blocking. This is actually very 
+close to the state of the art algorithms:
 
 \begin{codebox}[breakable]{}
 \footnotesize An example of matrix multiplication in OpenMP.
@@ -182,13 +227,19 @@ solving of linear systems, as two examples.
 \cppfile{code_examples/ml/multiply05_openmp.h}
 \end{codebox}
 
-\begin{codebox}[breakable]{}
-\footnotesize An example of matrix multiplication in OpenMP.
-\tcblower
-\cppfile{code_examples/ml/multiply06_openmp.h}
-\end{codebox}
+%\begin{codebox}[breakable]{}
+%\footnotesize An example of matrix multiplication in OpenMP.
+%\tcblower
+%\cppfile{code_examples/ml/multiply06_openmp.h}
+%\end{codebox}
 
 \subsection{Solving Linear Systems}
+
+In commonly-known approaches to solving linear systems, 
+the parallelization is less trivial. For example in Gauss
+elimination, once you pick a pivot, a large submatrix 
+(whose size depends on the pivot) needs to change. 
+See for example:
 
 \begin{codebox}[breakable]{}
 \footnotesize An example of Gauss in OpenMP.
@@ -196,6 +247,26 @@ solving of linear systems, as two examples.
 \cppfile{code_examples/ml/gauss01_openmp.h}
 \end{codebox}
 
-\subsection{Training Deep Neural Networks}
+\subsection{Machine Learning}
 
-Finally, 
+Much of machine learning is embarassingly parallel, 
+incl. hyperparameter search, 
+or data processing in Computer Vision, 
+where one often has to process  
+several streams of video in parallel, 
+and sometimes can process several images or frames 
+of a video in parallel.
+Much else in machine learning is close to being
+ embarassingly parallel, 
+such as coordinate descent methods.
+
+For one example of such embarrassingly parallel computation, see 
+\cite{akhriev2018pursuit}, which was originally developed 
+for monitoring data from a city-wide camera network of a European capital. 
+In one version of the code, similar to the snippet at  \url{https://github.com/jmarecek/OnlineLowRank},
+the goal was to speed up the computation per single stream of video, such that each core handles one stream from a 4K camera in real-time. 
+
+For another example of parallel programming in machine learning, see
+\cite{marevcek2015distributed}, and the corresponding code at:
+\url{https://github.com/optml/ac-dc/blob/master/cpp/src/solver/matrixCompletion/parallel/parallel_mc_opemmp.h}.
+

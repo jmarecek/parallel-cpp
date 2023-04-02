@@ -1,8 +1,5 @@
 void multiply_blocks(std::vector<int>& A, std::vector<int>& B, std::vector<int>& C) {
-#pragma omp declare reduction(vec_int_plus : std::vector<int> : \
-                    std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<int>())) \
-                    initializer(omp_priv = omp_orig)
-
+#pragma omp declare reduction(vec_int_plus : std::vector<int> : std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), std::plus<int>())) initializer(omp_priv = omp_orig)
 
     const int ROWS_IN_BLOCK = 10;
     const int BLOCKS_IN_ROW = ROWS/ROWS_IN_BLOCK;
