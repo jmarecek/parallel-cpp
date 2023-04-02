@@ -163,7 +163,7 @@ solving of linear systems, as two examples.
 Matrix-vector multiplication is a key primitive throughout 
 linear algebra. Considering that the computation:
 \begin{align}
-    y_j=\sum_{i} a_{ji} x_i
+    y_j= \sum_{i} a_{ji} x_i
 \end{align}
 for each coordinate $j$ in the resulting vector $y$,
 can be computed in parallel, independently of any other,
@@ -184,7 +184,7 @@ which would be computed column-wise:
 
 \begin{align}
 z_{ij} = & a_{ij} x_j\\
-y_i    = & sum_{j} z_ij
+y_i    = & \sum_{j} z_ij
 \end{align}
 
 This would be difficult, in terms of the cache hierarchies. 
@@ -247,7 +247,15 @@ See for example:
 \cppfile{code_examples/ml/gauss01_openmp.h}
 \end{codebox}
 
-\subsection{Machine Learning}
+Notice, however, that one can rephrase the solving of 
+a linear system in terms of solving a least squares
+problem (minimizing the residual) and that modern 
+optimization methods are competitive with tailor-made 
+solvers for linear systems cf. \cite{gower2015randomized}.
+One can hence focus on parallelizing optimization methods.
+ 
+
+\subsection{Optimization for Machine Learning}
 
 Much of machine learning is embarassingly parallel, 
 incl. hyperparameter search, 
@@ -256,9 +264,11 @@ where one often has to process
 several streams of video in parallel, 
 and sometimes can process several images or frames 
 of a video in parallel.
-Much else in machine learning is close to being
- embarassingly parallel, 
-such as coordinate descent methods.
+
+Much else in machine learning is actually optimization,
+which can be parallelized efficiently, 
+either in coordinate descent methods,
+or via stochastic gradient methods. 
 
 For one example of such embarrassingly parallel computation, see 
 \cite{akhriev2018pursuit}, which was originally developed 
