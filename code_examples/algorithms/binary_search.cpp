@@ -3,16 +3,16 @@
 
 #include <algorithm>
 #include <cassert>
-#include <vector>
 #include <iostream>
 #include <iterator>
 #include <ranges>
 #include <set>
+#include <vector>
 
 int main() {
 #include "binary_search_code.h"
-assert(exists);
-assert(lb != ub);
+  assert(exists);
+  assert(lb != ub);
 
-std::cerr << ".";
+  std::cerr << ".";
 }

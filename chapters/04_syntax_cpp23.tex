@@ -12,14 +12,14 @@ At the same time, it was almost impossible to handle exceptions while being able
 The use of the C++11 \cpp{thread} is thus considered harmful and we will present only two short examples.
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/sK8oMxWa8}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/nqdn4YvEM}{\ExternalLink}}
 \footnotesize An example of the use of a C++11 thread.
 \tcblower
 \cppfile{code_examples/cpp23/thread1.cpp}
 \end{codebox}
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/hGc9no3dh}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/1Gbf4Wo75}{\ExternalLink}}
 \footnotesize An example of the use of a C++11 thread.
 \tcblower
 \cppfile{code_examples/cpp23/thread2.cpp}
@@ -32,7 +32,7 @@ C++20 adds a new class \cpp{jthread} (``joining threads''), which does not requi
 This is an example of the ``resource acquisition is initialization'' idiom, which is generally one of the best practices in C++. In RAII, the resource allocation is tied to an object's lifetime and is hence a class invariant. In a constructor, one allocates the resources. In a destructor, one releases the resources. There is no risk of a resource leak. 
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/h9KMT3KeE}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/eWrfrsd7K}{\ExternalLink}}
 \footnotesize An example of the use of jthread.
 \tcblower
 \cppfile{code_examples/cpp23/jthread1.cpp}
@@ -41,7 +41,7 @@ This is an example of the ``resource acquisition is initialization'' idiom, whic
 Notice that the above example would very like result in abnormal program termination, if we changed jthread to thread. (Why?) When we use standard output, it is prudent to wrap it in a syncstream: 
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/K1ex7qxEE}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/rr1GrWqfP}{\ExternalLink}}
 \footnotesize An example of the use of jthread.
 \tcblower
 \cppfile{code_examples/cpp23/jthread2.cpp}
@@ -50,7 +50,7 @@ Notice that the above example would very like result in abnormal program termina
 Rather commonly, one uses the lambda function to define the thread. (This is the \cpp{[]()}.) 
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/7z7fdaPs3}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/7M7h5nEeM}{\ExternalLink}}
 \footnotesize An example of the use of jthread.
 \tcblower
 \cppfile{code_examples/cpp23/jthread3.cpp}
@@ -59,7 +59,7 @@ Rather commonly, one uses the lambda function to define the thread. (This is the
 Passing arguments to threads is, nevertheless, very useful. Notably, when we pass the first argument of type \cpp{std::stop_token token}, we request the thread to stop its execution by calling \cpp{request_stop()} on the jthread object:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/vMEvd9bcP}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/rMGGPP88q}{\ExternalLink}}
 \footnotesize An example of the use of jthread.
 \tcblower
 \cppfile{code_examples/cpp23/jthread4.cpp}
@@ -68,7 +68,7 @@ Passing arguments to threads is, nevertheless, very useful. Notably, when we pas
 More complicated procedures for the stopping of the thread possible. One can define \cpp{std::stop_callback} object inside the thread, whose constructor takes the stop token (\cpp{std::stop_token}) and a function. The function (in the example below another lambda) gets executed, when the thread is requested to stop via the \cpp{std::stop_token}:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/hv74G64TW}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/hE4rMznWq}{\ExternalLink}}
 \footnotesize An example of the use of jthread.
 \tcblower
 \cppfile{code_examples/cpp23/jthread5.cpp}
@@ -78,7 +78,7 @@ More complicated procedures for the stopping of the thread possible. One can def
 
 % The following needs some more work, yet.
 %\raggedbottom
-%\begin{codebox}[]{\href{https://godbolt.org/z/EYMMnhT4b}{\ExternalLink}}
+%\begin{codebox}[]{\href{https://godbolt.org/z/cGeMrdann}{\ExternalLink}}
 %\footnotesize An example of the use of jthread.
 %\tcblower
 %\cppfile{code_examples/cpp23/jthread6.cpp}
@@ -144,7 +144,7 @@ The promise class is instantiated for each instance of the coroutine, and its me
 Once we have a promise class, we can specialize template class \cpp{std::coroutine_handle}, which can be seen as the equivalent of a pointer and its method ``destroy'' as equivalent to a ``free'', and use the handle specialized to our own promise class to define a promise class:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/1nYdMPh3z}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/hP37s5jjh}{\ExternalLink}}
 \footnotesize An example of the use of coroutines.
 \tcblower
 \cppfile{code_examples/cpp23/coroutines3.cpp}
@@ -173,14 +173,14 @@ The two awaiters we have seen so far (\cpp{std::suspend_never()} and \cpp{std::s
 By defining \cpp{await_transform()} in the promise type, the compiler will use \cpp{co_await promise.await_transform(<expr>)} instead of any call of \cpp{co_await <expr>} in the coroutine. 
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/WKn5h181v}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/b5a94YeKx}{\ExternalLink}}
 \footnotesize An example defining a Generator (1/2).
 \tcblower
 \cppfile{code_examples/cpp23/coroutines4.h}
 \end{codebox}
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/WKn5h181v}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/b5a94YeKx}{\ExternalLink}}
 \footnotesize An example defining a Generator (2/2).
 \tcblower
 \cppfile{code_examples/cpp23/coroutines4.cpp}
@@ -189,21 +189,21 @@ By defining \cpp{await_transform()} in the promise type, the compiler will use \
 Eventually, in C++23 and C++26, the support for message-passing architectures based on \url{https://github.com/lewissbaker/cppcoro} should be available. For a small sample, see a custom implementation here:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/W8Khds7xh}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/KhYaGPn7e}{\ExternalLink}}
 \footnotesize An example of the use of coroutines in message-passing architectures (1/3).
 \tcblower
 \cppfile{code_examples/cpp23/coroutines5a.h}
 \end{codebox}
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/d3crro7hM}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/5vEsW6dKE}{\ExternalLink}}
 \footnotesize An example of the use of coroutines in message-passing architectures (2/3)
 \tcblower
 \cppfile{code_examples/cpp23/coroutines5b.h}
 \end{codebox}
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/n9Kc6TqMW}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/vEaM8PM9s}{\ExternalLink}}
 \footnotesize An example of the use of coroutines in message-passing architectures (3/3)
 \tcblower
 \cppfile{code_examples/cpp23/coroutines5.cpp}
@@ -226,14 +226,14 @@ The primary template can be instantiated with types that are TriviallyCopyable, 
 First, let us consider two simple examples:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/Ezqo4G7Ec}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/4Gjjrbjso}{\ExternalLink}}
 \footnotesize An example of the use of atomic variables.
 \tcblower
 \cppfile{code_examples/cpp23/atomic1.cpp}
 \end{codebox}
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/M8vbK1zjT}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/K4q5n3xh5}{\ExternalLink}}
 \footnotesize An example of the use of atomic variables.
 \tcblower
 \cppfile{code_examples/cpp23/atomic2.cpp}
@@ -242,7 +242,7 @@ First, let us consider two simple examples:
 Finally, let us consider two, more complete examples of a stack:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/Yf7a7G4YG}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/vs5bKzjxe}{\ExternalLink}}
 \footnotesize A stack implemented using atomic variables.
 \tcblower
 \cppfile{code_examples/cpp23/atomic5.cpp}
@@ -260,14 +260,14 @@ Crucially, using \cpp{scoped_lock} provides the ability to lock multiple mutexes
 One may hence advise to use one or more \cpp{mutex} with a \cpp{scoped_lock} on top. 
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/85Md13Mea}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/zeM6xMz84}{\ExternalLink}}
 \footnotesize An example of the use of a unique lock.
 \tcblower
 \cppfile{code_examples/cpp23/mutex1.cpp}
 \end{codebox}
 
 %\raggedbottom
-%\begin{codebox}[]{\href{https://godbolt.org/z/GoKTaxhe9}{\ExternalLink}}
+%\begin{codebox}[]{\href{https://godbolt.org/z/Tvxj9Yczj}{\ExternalLink}}
 %\footnotesize Locking multiple mutexes at once.
 %\tcblower
 %\cppfile{code_examples/cpp23/lock_guard.h}
@@ -276,7 +276,7 @@ One may hence advise to use one or more \cpp{mutex} with a \cpp{scoped_lock} on 
 A slightly more verbose example considers:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/T8saW1sEv}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/qeYzaz6We}{\ExternalLink}}
 \footnotesize An example of the use of a unique lock.
 \tcblower
 \cppfile{code_examples/cpp23/mutex2.cpp}
@@ -287,7 +287,7 @@ A slightly more verbose example considers:
 Since C++20, there is support for barriers in header \cpp{<barrier>}. The constructor takes an integer value, which is the number of threads that the barrier is expected to block. The key methods are \cpp{arrive_and_wait()} and \cpp{arrive_and_drop()}. The former functions as one would expect. The latter decrements the initial expected count for all uses by one, as if one thread could never reach the barrier subsequently. This can be very useful in error management:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/KrzfYe88s}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/fT17E5P4x}{\ExternalLink}}
 \footnotesize An example of the use of a barrier.
 \tcblower
 \cppfile{code_examples/cpp23/barrier1.cpp}
@@ -296,7 +296,7 @@ Since C++20, there is support for barriers in header \cpp{<barrier>}. The constr
 More complicated uses of barriers may use the template parameter \cpp{CompletionFunction} and have a callable executed whenever the barrier is hit (reaches zero):
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/EjW8xc8fc}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/McM63hnn4}{\ExternalLink}}
 \footnotesize An example of the use of a barrier.
 \tcblower
 \cppfile{code_examples/cpp23/barrier2.cpp}
@@ -312,7 +312,7 @@ Since C++17, there is an excellent Parallel Standard Template Library in header 
 The most useful algorithm from the Standard Template Library (STL) in terms of parallel programming is surely for each:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/dfzW6xTKc}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/vrbcYdM3o}{\ExternalLink}}
 \footnotesize An example of the use of for each.
 \tcblower
 \cppfile{code_examples/cpp23/for_each_code_parallel.h}
@@ -325,7 +325,7 @@ As in the serial version of STL, the callable within for each is permitted to ch
 Similarly useful is the reduce operation (also known as fold, accumulate, aggregate, compress, or inject). Indeed, a whole approach to parallel programming (Map Reduce) is named after the algorithm. There, one applies an associative operation to each piece of data to obtain a partial result, and then (perhaps using a binary-tree reduction, which also may enforce an order which may or may not be desirable) obtains the final result by applying the same associative operation to the partial results. The binary-tree reduction makes it possible to utilize $O(\log(n))$ rounds of computation on $n$ processors. 
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/Kb1rarPE7}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/bG5q3GxzK}{\ExternalLink}}
 \footnotesize An example of the use of reduce.
 \tcblower
 \cppfile{code_examples/cpp23/reduce_code.h}
@@ -336,7 +336,7 @@ Similarly useful is the reduce operation (also known as fold, accumulate, aggreg
 Finally, in implementing parallel sorting algorithms, we will utilize the parallel merge operation:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/rrTKvrhfG}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/477sfja8z}{\ExternalLink}}
 \footnotesize An example of the use of a merge.
 \tcblower
 \cppfile{code_examples/cpp23/merge_par_code.h}

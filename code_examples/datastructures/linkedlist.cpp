@@ -9,30 +9,29 @@
 //  http://creativecommons.org/licenses/by/4.0/
 //********************************************************
 
-
 #include <iostream>
+#include <memory> // includes <atomic> now
 #include <thread>
-#include <memory>               // includes <atomic> now
-using namespace std::literals;  // for duration literals
+using namespace std::literals; // for duration literals
 
 include "linkedlist.h"
 
-int main()
-{
+    int
+    main() {
   AtomicList<std::string> alist;
 
   // populate list with elements from 10 threads:
   {
     std::vector<std::jthread> threads;
     for (int i = 0; i < 100; ++i) {
-      threads.push_back(std::jthread{[&, i]{
-                                       for (auto s : {"hi", "hey", "ho", "last"}) {
-                                         alist.insert(std::to_string(i) + s);
-                                         std::this_thread::sleep_for(5ns);
-                                       }
-                                     }});
+      threads.push_back(std::jthread{[&, i] {
+        for (auto s : {"hi", "hey", "ho", "last"}) {
+          alist.insert(std::to_string(i) + s);
+          std::this_thread::sleep_for(5ns);
+        }
+      }});
     }
   } // wait for all threads to finish
 
-  alist.print();   // print resulting list
+  alist.print(); // print resulting list
 }

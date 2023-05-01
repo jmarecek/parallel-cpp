@@ -81,7 +81,7 @@ C++20 introduced the spaceship operator, whereby user-defined types can easily a
 
 \emph{C++20 does not enforce that the comparator is thread safe, although that matters greatly for the thread-safe nature of the whole sorting algorithm!}
 
-\begin{codebox}[breakable]{\href{https://compiler-explorer.com/z/7PjY8fc1G}{\ExternalLink}}
+\begin{codebox}[breakable]{\href{https://compiler-explorer.com/z/GvMGhYdos}{\ExternalLink}}
 \footnotesize Example of three approaches to implementing lexicographical comparison for a custom type \emph{that are not thread safe!}.
 \tcblower
 \cppfile{code_examples/theory/comparable_code.h}
@@ -108,7 +108,7 @@ Lexicographical \texttt{strict\_weak\_ordering} for ranges is exposed through th
 
 \constraints{(\cpp{input_range}, \cpp{input_range})}{(\cpp{forward_range}, \cpp{forward_range})}{\cpp{operator<}}{\cpp{strict_weak_ordering}}
 
-\begin{codebox}[breakable]{\href{https://compiler-explorer.com/z/YGW4ET1oa}{\ExternalLink}}
+\begin{codebox}[breakable]{\href{https://compiler-explorer.com/z/38vdfe8vo}{\ExternalLink}}
 \footnotesize Example of using \cpp{lexicographical_compare} and the built-in less than operator to compare vectors of integers.
 \tcblower
 \cppfile{code_examples/algorithms/lexicographical_compare_code.h}
@@ -116,7 +116,7 @@ Lexicographical \texttt{strict\_weak\_ordering} for ranges is exposed through th
 
 Because the standard containers already offer a built-in lexicographical comparison, the algorithm mainly finds use for comparing raw C arrays and in cases when we need to specify a custom comparator.
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/djs6TGsEs}{\ExternalLink}}
+\begin{codebox}[]{\href{https://compiler-explorer.com/z/Ydedor1cr}{\ExternalLink}}
 \footnotesize Example of using \cpp{lexicographical_compare} for C-style arrays and customizing the comparator.
 \tcblower
 \cppfile{code_examples/algorithms/lexicographical_compare_useful_code.h}
@@ -137,7 +137,7 @@ The type depends on the type returned by the elements' spaceship operator.
 \cppversions{\texttt{lex\dots three\_way}}{\CC20}{\CC20}{N/A}{N/A}
 \constraints{\texttt{(input\_range, input\_range)}}{}{\texttt{operator<=>}}{\texttt{strong\_ordering}, \texttt{weak\_ordering}, \texttt{partial\_ordering}}
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/vrEqPaEEz}{\ExternalLink}}
+\begin{codebox}[]{\href{https://compiler-explorer.com/z/a73njbW4M}{\ExternalLink}}
 \footnotesize Example of using \cpp{std::lexicographical_compare_three_way}.
 \tcblower
 \cppfile{code_examples/algorithms/lexicographical_compare_three_way_code.h}
@@ -153,7 +153,7 @@ The \cpp{std::sort} algorithm is the canonical $O(n\log n)$ sort.
 
 Due to the $O(n\log n)$ complexity guarantee, \cpp{std::sort} only operates on \cpp{random_access} ranges. Notably, \cpp{std::list} offers a method with approximately $n\log n$ complexity.
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/vef61TWj9}{\ExternalLink}}
+\begin{codebox}[]{\href{https://compiler-explorer.com/z/W9WodGs71}{\ExternalLink}}
 \footnotesize Basic example of using \cpp{std::sort} and \cpp{std::list::sort}.
 \tcblower
 \cppfile{code_examples/algorithms/sort_code.h}
@@ -161,7 +161,7 @@ Due to the $O(n\log n)$ complexity guarantee, \cpp{std::sort} only operates on \
 
 With C++20, we can take advantage of projections to sort by a method or member:
 
-\begin{codebox}[breakable]{\href{https://compiler-explorer.com/z/4aGenq9b6}{\ExternalLink}}
+\begin{codebox}[breakable]{\href{https://compiler-explorer.com/z/35YK5q15M}{\ExternalLink}}
 \footnotesize Example of using a projection in conjunction with a range algorithm. The algorithm will sort the elements based on the values obtained by invoking the method \cpp{value} on each element.
 \tcblower
 \cppfile{code_examples/algorithms/sort_projection_code.h}
@@ -179,7 +179,7 @@ The \cpp{std::sort} is free to re-arrange equivalent elements, which can be unde
 
 If additional memory is available, stable\_sort remains $O(n\log n)$. However, if it fails to allocate, it will degrade to an $O(n\log n\log n)$ algorithm.
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/TKx8qP8bK}{\ExternalLink}}
+\begin{codebox}[]{\href{https://compiler-explorer.com/z/bh7o1KG91}{\ExternalLink}}
 \footnotesize Example of re-sorting a range using \cpp{std::stable_sort}, resulting in a guaranteed order of elements.
 \tcblower
 \cppfile{code_examples/algorithms/stable_sort_code.h}
@@ -193,7 +193,7 @@ The \cpp{std::is_sorted} algorithm is a linear check returning a boolean denotin
 \cppversions{\texttt{is\_sorted}}{\CC11}{\CC20}{\CC17}{\CC20}
 \constraints{\texttt{forward\_range}}{\texttt{forward\_range}}{\cpp{std::less}}{\texttt{strict\_weak\_ordering}}
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/T3n9bfqdM}{\ExternalLink}}
+\begin{codebox}[]{\href{https://compiler-explorer.com/z/zqK9aohWs}{\ExternalLink}}
 \footnotesize Example of testing a range using \cpp{std::is_sorted}.
 \tcblower
 \cppfile{code_examples/algorithms/is_sorted_code.h}
@@ -207,7 +207,7 @@ The \cpp{std::is_sorted_until} algorithm returns the first out-of-order element 
 \cppversions{\texttt{is\_sorted\_until}}{\CC11}{\CC20}{\CC17}{\CC20}
 \constraints{\texttt{forward\_range}}{\texttt{forward\_range}}{\texttt{std::less}}{\texttt{strict\_weak\_ordering}}
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/1dvboE6b1}{\ExternalLink}}
+\begin{codebox}[]{\href{https://compiler-explorer.com/z/48PaYE9Ej}{\ExternalLink}}
 \footnotesize Example of testing a range using \cpp{std::is_sorted_until}.
 \tcblower
 \cppfile{code_examples/algorithms/is_sorted_until_code.h}
@@ -227,7 +227,7 @@ The \cpp{std::partial_sort} algorithm reorders the range's elements such that th
 
 The benefit of using a partial sort is faster runtime — approximately $O(n \log k)$, where k is the number of elements sorted.
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/j6xjM4GnT}{\ExternalLink}}
+\begin{codebox}[]{\href{https://compiler-explorer.com/z/Th9YTzGsM}{\ExternalLink}}
 \footnotesize Example of using \cpp{std::partial_sort} to sort the first three elements of a range.
 \tcblower
 \cppfile{code_examples/algorithms/partial_sort_code.h}
@@ -243,7 +243,7 @@ The \cpp{std::partial_sort_copy} algorithm has the same behaviour as \linebreak\
 
 The consequence of writing output to a second range is that the source range does not have to be mutable nor provide random access.
 
-\begin{codebox}[]{\href{https://compiler-explorer.com/z/vjKc5nY31}{\ExternalLink}}
+\begin{codebox}[]{\href{https://compiler-explorer.com/z/Ehjbhfj9s}{\ExternalLink}}
 \footnotesize Example of using \cpp{std::partial_sort_copy} to iterate over ten integers read from standard input and storing the top three values in sorted order.
 \tcblower
 \cppfile{code_examples/algorithms/partial_sort_copy_code.h}

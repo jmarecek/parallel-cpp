@@ -3,18 +3,17 @@
 
 #include <algorithm>
 #include <cassert>
-#include <vector>
+#include <execution>
 #include <iostream>
 #include <iterator>
-#include <ranges>
 #include <numeric>
 #include <ranges>
-#include <execution>
+#include <vector>
 
 int main() {
 #include "reduce_code.h"
-assert(sum == 15);
-assert(product == 120);
+  assert(sum == 15);
+  assert(product == 120);
 
-std::cerr << ".";
+  std::cerr << ".";
 }

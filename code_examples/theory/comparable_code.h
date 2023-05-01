@@ -1,23 +1,22 @@
 struct Point {
 
-int x;
-int y;
+  int x;
+  int y;
 
-// pre-C++20 lexicographical less-than
-friend bool operator<(const Point& left, const Point& right) {
-	if (left.x != right.x)
-		return left.x < right.x;
-	return left.y < right.y;
-}
+  // pre-C++20 lexicographical less-than
+  friend bool operator<(const Point &left, const Point &right) {
+    if (left.x != right.x)
+      return left.x < right.x;
+    return left.y < right.y;
+  }
 
-// default C++20 spaceship version of lexicographical comparison
-friend auto operator<=>(const Point&, const Point&) = default;
+  // default C++20 spaceship version of lexicographical comparison
+  friend auto operator<=>(const Point &, const Point &) = default;
 
-// manual version of lexicographical comparison using operator <=>
-friend auto operator<=>(const Point& left, const Point& right) {
-	if (left.x != right.x)
-		return left.x <=> right.x;
-	return left.y <=> right.y;
-}
-
+  // manual version of lexicographical comparison using operator <=>
+  friend auto operator<=>(const Point &left, const Point &right) {
+    if (left.x != right.x)
+      return left.x <=> right.x;
+    return left.y <=> right.y;
+  }
 };

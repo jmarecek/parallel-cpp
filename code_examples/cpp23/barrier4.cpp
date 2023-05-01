@@ -1,14 +1,12 @@
-#include <barrier>
-#include <syncstream>
-#include <iostream>
-#include <vector>
-#include <thread>
 #include <algorithm>
+#include <barrier>
+#include <iostream>
 #include <random>
-​
-int main() {
-​
-  auto on_completion = []() noexcept { 
+#include <syncstream>
+#include <thread>
+#include <vector>
+​ int main() {
+  ​ auto on_completion = []() noexcept {
     std::osyncstream(std::cout) << " hit! ";
   };
   std::barrier b(2, on_completion);
@@ -23,8 +21,9 @@ int main() {
     std::this_thread::yield();
     b.arrive_and_wait();
   };
- 
-  for (int cnt=0; cnt < 2; cnt++) {
+
+  for (int cnt = 0; cnt < 2; cnt++) {
     threads.emplace_back(work);
-  }​
+  }
+  ​
 }

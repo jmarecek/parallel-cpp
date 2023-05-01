@@ -1,6 +1,6 @@
 struct Account {
-	double value() { return value_; }
-	double value_;
+  double value() { return value_; }
+  double value_;
 };
 
 std::vector<Account> accounts{{0.1}, {0.3}, {0.01}, {0.05}};

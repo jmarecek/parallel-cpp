@@ -1,22 +1,21 @@
 // Based on https://github.com/NVIDIA/thrust/blob/main/examples/saxpy.cu
 
-#include <thrust/device_vector.h>
-#include <thrust/transform.h>
+#include <iostream>
 #include <thrust/copy.h>
+#include <thrust/device_vector.h>
 #include <thrust/fill.h>
 #include <thrust/functional.h>
-#include <iostream>
+#include <thrust/transform.h>
 
 struct saxpy_functor {
   const float a;
   saxpy_functor(float _a) : a(_a) {}
-  __host__ __device__
-  float operator()(const float& x, const float& y) const { 
+  __host__ __device__ float operator()(const float &x, const float &y) const {
     return a * x + y;
   }
 };
 
-int main(){
+int main() {
   thrust::device_vector<float> dx(1048576);
   thrust::fill(dx.begin(), dx.end(), 1.0);
   thrust::device_vector<float> dy(1048576);

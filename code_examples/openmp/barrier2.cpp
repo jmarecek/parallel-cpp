@@ -1,33 +1,29 @@
+#include "omp.h"
 #include <iostream>
 #include <syncstream>
-#include "omp.h"
 
 void work(int n) { std::osyncstream(std::cout) << n; }
-void sub3(int n)
-{
-    work(n);
+void sub3(int n) {
+  work(n);
 #pragma omp barrier
-    work(n);
+  work(n);
 }
-void sub2(int k)
-{
+void sub2(int k) {
 #pragma omp parallel shared(k)
-    sub3(k);
+  sub3(k);
 }
-void sub1(int n)
-{
-    int i;
+void sub1(int n) {
+  int i;
 #pragma omp parallel private(i) shared(n)
-    {
+  {
 #pragma omp for
-        for (i=0; i<n; i++)
-            sub2(i);
-    }
+    for (i = 0; i < n; i++)
+      sub2(i);
+  }
 }
-int main()
-{
-    sub1(2);
-    sub2(2);
-    sub3(2);
-    return 0;
+int main() {
+  sub1(2);
+  sub2(2);
+  sub3(2);
+  return 0;
 }

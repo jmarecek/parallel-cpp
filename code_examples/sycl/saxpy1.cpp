@@ -1,31 +1,32 @@
-#include <vector>
-#include <iostream>
 #include <cuda.h>
+#include <iostream>
+#include <vector>
 #define N 1048576
 
-__global__ void saxpy_kernel(float a, float* x, float* y, float* z){
-  int i = blockIdx.x*blockDim.x + threadIdx.x;
-  if (i < n) y[i] = a*x[i] + y[i];
+__global__ void saxpy_kernel(float a, float *x, float *y, float *z) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i < n)
+    y[i] = a * x[i] + y[i];
 }
 
-int main(){
+int main() {
   std::vector<float> vx(N);
-  float* x = vx.data();
+  float *x = vx.data();
   std::vector<float> vy(N);
-  float* y = vy.data();
+  float *y = vy.data();
   std::vector<float> vz(N);
-  float* z = vz.data();
+  float *z = vz.data();
   float *dx, *dy, *dz;
-  cudaMalloc(&dx, N*sizeof(float));
-  cudaMalloc(&dy, N*sizeof(float));
-  cudaMalloc(&dz, N*sizeof(float));
-  cudaMemcpy(dx, x, N*sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(dy, y, N*sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc(&dx, N * sizeof(float));
+  cudaMalloc(&dy, N * sizeof(float));
+  cudaMalloc(&dz, N * sizeof(float));
+  cudaMemcpy(dx, x, N * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(dy, y, N * sizeof(float), cudaMemcpyHostToDevice);
   int nblocks = (n + 255) / 256;
   saxpy_kernel<<<nblocks, 256>>>(3.1415, dx, dy, dz);
-  cudaMemcpy(z, dz, N*sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(z, dz, N * sizeof(float), cudaMemcpyDeviceToHost);
   cudaFree(dx);
   cudaFree(dy);
   cudaFree(dz);
-  // we do not need free(x), free(y), free(z) 
+  // we do not need free(x), free(y), free(z)
 }

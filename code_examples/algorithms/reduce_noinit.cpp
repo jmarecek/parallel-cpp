@@ -1,16 +1,15 @@
 #include <algorithm>
 #include <cassert>
-#include <vector>
+#include <execution>
 #include <iostream>
 #include <iterator>
-#include <ranges>
 #include <numeric>
 #include <ranges>
-#include <execution>
+#include <vector>
 
 int main() {
 #include "reduce_noinit_code.h"
-assert(final_duck.sound == "QuackQuackQuack");
+  assert(final_duck.sound == "QuackQuackQuack");
 
-std::cerr << ".";
+  std::cerr << ".";
 }

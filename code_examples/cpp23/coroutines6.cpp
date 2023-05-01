@@ -23,9 +23,9 @@
 #include <utility>
 
 class Generator {
- public:
+public:
   class promise_type {
-   public:
+  public:
     Generator get_return_object() {
       return Generator(
           std::coroutine_handle<promise_type>::from_promise(*this));
@@ -43,7 +43,7 @@ class Generator {
 
   // ----
 
- public:
+public:
   std::optional<int> next() {
     if (!m_cohandle || m_cohandle.done()) {
       return std::nullopt;
@@ -55,7 +55,7 @@ class Generator {
     return m_cohandle.promise().m_value;
   }
 
- private:
+private:
   // Regular constructor.
   explicit Generator(const std::coroutine_handle<promise_type> cohandle)
       : m_cohandle{cohandle} {}
@@ -64,11 +64,11 @@ class Generator {
 
   // ----
 
- public:
+public:
   // This class is move-only. See
   // https://google.github.io/styleguide/cppguide.html#Copyable_Movable_Types
-  Generator(Generator&& other) : m_cohandle{other.release_handle()} {}
-  Generator& operator=(Generator&& other) {
+  Generator(Generator &&other) : m_cohandle{other.release_handle()} {}
+  Generator &operator=(Generator &&other) {
     if (this != &other) {
       if (m_cohandle) {
         m_cohandle.destroy();
@@ -85,7 +85,7 @@ class Generator {
     }
   }
 
- private:
+private:
   std::coroutine_handle<promise_type> release_handle() {
     return std::exchange(m_cohandle, nullptr);
   }
@@ -106,7 +106,7 @@ Generator filter(Generator g, int prime) {
   }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   Generator g = source(40);
   while (std::optional<int> optional_prime = g.next()) {
     int prime = optional_prime.value();

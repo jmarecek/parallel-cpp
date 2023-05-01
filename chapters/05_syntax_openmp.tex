@@ -39,7 +39,7 @@ A key construct in OpenMP is thus \cpp{#pragma omp parallel}, which delineates a
 By default, the number of threads is set based on the available hardware threads, but this can be affected by the environment variables (\cpp{OMP_NUM_THREADS}) and modifiers of the pragma (\cpp{num_threads(2)}) and function calls (\cpp{omp_set_num_threads()}). 
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/bdP9o8rov}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/KTGbEWhWz}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP parallel regions.
 \tcblower
 \cppfile{code_examples/openmp/parallel1.cpp}
@@ -63,7 +63,7 @@ settings that we can affect through \cpp{omp_set_nested}, or environment variabl
 See, for example:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/Ejh5EfPqj}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/xKovbx9r1}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP parallel regions.
 \tcblower
 \cppfile{code_examples/openmp/parallel2.cpp}
@@ -75,7 +75,7 @@ As has been mentioned above, ideally one and the same program written with OpenM
 This requires sizing the work in each thread depending on the number of threads, such as in:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/vTx9Mxzno}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/fjsqqY5ac}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP parallel regions.
 \tcblower
 \cppfile{code_examples/openmp/parallel3.cpp}
@@ -90,14 +90,14 @@ There is an implied barrier of the sections region, unless eliminated by a \cpp{
 See, for example:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/PrEPzhsGn}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/eWeoz93Yh}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP sections.
 \tcblower
 \cppfile{code_examples/openmp/section1.cpp}
 \end{codebox}
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/fTsv1qz4K}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/4Gr4Tqxdn}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP sections.
 \tcblower
 \cppfile{code_examples/openmp/section2.cpp}
@@ -108,7 +108,7 @@ See, for example:
 The closest to a coroutine in OpenMP is the concept of a task. While it does not come with a promise of an implementation with a user-level thread library (cf. Argobots, Converse threads,	Qthreads,	MassiveThreads, Nanos++, Maestro, GnuPth, StackThreads/MP, Protothreads, Capriccio, StateThreads, TiNy-threads, etc), it often is implemented thus.  
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/TM5WjPvT9}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/KxnG889vb}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP tasks.
 \tcblower
 \cppfile{code_examples/openmp/task1.cpp}
@@ -120,7 +120,7 @@ There is a nascent support for the use of GPGPUs via \cpp{target} construct.
 While the block following the target construct can be arbitrary, in principle, most GPUs are not able to support arbitrary code. Specifically, there limitations on the use of synchronization primitives and coherence among L1 caches. Ideally, one should combine the offloading of the code to the GPGU (via the target), across multiple partitions (via teams construct) etc. This can get quite non-trivial:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/TM5WjPvT9}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/ezMfjo6Mr}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP targets and teams.
 \tcblower
 \cppfile{code_examples/openmp/target1.h}
@@ -173,7 +173,7 @@ OpenMP has a rich support for atomic variables.
 At the simplest one may consider:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/baqqEMKEe}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/1eMjxWbhx}{\ExternalLink}}
 \footnotesize An example of the use of atomic variables.
 \tcblower
 \cppfile{code_examples/openmp/atomic1.cpp}
@@ -193,7 +193,7 @@ Note that you need to use \cpp{{}} to create a new block, wherein the operations
 As we have briefly mentioned on page \pageref{sec:reduction1}, one may consider a reduction, which produces a single value from an associative operations such as addition, multiplication, taking of the minimum, maximum, or custom associative functions. The goal is for each thread to run the reduction with a private copy and then to produce the final result with the same reduction, perhaps in a hierarchical fashion. A simplistic blueprint is provided in the following example:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/orfM3x13M}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/eaEKhsbds}{\ExternalLink}}
 \footnotesize An example of the use of reductions.
 \tcblower
 \cppfile{code_examples/openmp/reduction.cpp}
@@ -205,14 +205,14 @@ OpenMP has only a limited support for mutexes, as in does not support any RAII v
 which makes them hard to use correctly. One can, however, construct one own's RAII variant:
 
 %\raggedbottom
-%\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+%\begin{codebox}[]{\href{https://godbolt.org/z/8adcKW89q}{\ExternalLink}}
 %\footnotesize An example of the use of OpenMP mutexes.
 %\tcblower
 %\cppfile{code_examples/openmp/mutex1.cpp}
 %\end{codebox}
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/vnsW7v35z}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/nEhfvafbY}{\ExternalLink}}
 \footnotesize An example of the use of OpenMP mutexes.
 \tcblower
 \cppfile{code_examples/openmp/mutex2.cpp}
@@ -227,7 +227,7 @@ This can be used to protect non-trivial non-associative update operations,
 for which we cannot use reductions: 
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/YYeqYEdv3}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/af65nT8a8}{\ExternalLink}}
 \footnotesize An example of the use of a critical section.
 \tcblower
 \cppfile{code_examples/openmp/critical1.cpp}
@@ -240,7 +240,7 @@ The use of critical sections does come with a substantial penalty in terms of pe
 OpenMP provides a straightforward, explicit barrier construct:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/qK53jYonK}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/EsGn6zq34}{\ExternalLink}}
 \footnotesize An example of the use of a barrier.
 \tcblower
 \cppfile{code_examples/openmp/barrier1.cpp}
@@ -251,7 +251,7 @@ All threads of the current team must complete execution of all tasks bound to th
 depends on the settings of the nesting:
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/eb7n975ea}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/GTxhMY3qf}{\ExternalLink}}
 \footnotesize An example of the use of a barrier, whose study is left as an exercise.
 \tcblower
 \cppfile{code_examples/openmp/barrier2.cpp}
@@ -277,14 +277,14 @@ While OpenMP does not really implement any algorithms, some of the data-parallel
 OpenMP makes it possible to use ``for each'':
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/Y4MdjMGqa}{\ExternalLink}}
 \footnotesize An example of the use of for each.
 \tcblower
 \cppfile{code_examples/openmp/for_each1.cpp}
 \end{codebox}
 
 \raggedbottom
-\begin{codebox}[]{\href{https://godbolt.org/z/enK6dYEoW}{\ExternalLink}}
+\begin{codebox}[]{\href{https://godbolt.org/z/1js1b9Kqn}{\ExternalLink}}
 \footnotesize An example of the use of for each.
 \tcblower
 \cppfile{code_examples/openmp/for_each2.cpp}
