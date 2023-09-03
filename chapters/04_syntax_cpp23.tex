@@ -5,7 +5,7 @@
 \subsection{C++11 thread}
 
 C++11 had a very basic support for threads, in terms of \cpp{std::thread} of header \cpp{thread}. The thread starts running once the constructor is called. The object is not CopyConstructible nor CopyAssignable. 
-The challenge in C++11 threads is that one needs to call \cpp{join} or \cpp{detach} prior to the destructor being called. If neither was called, the program was \cpp{std::abort}ed. 
+The challenge in C++11 threads is that one needs to call \cpp{join} or \cpp{detach} (joining threads ensures synchronization and waits for completion, while detaching threads allows them to run independently without synchronization or waiting) prior to the destructor being called. If neither was called, the program was \cpp{std::abort}ed. 
 Prior to calling either, one needs to check whether the thread is \cpp{joinable()}.
 At the same time, it was almost impossible to handle exceptions while being able to call \cpp{join} correctly. 
 %std::promise
@@ -29,7 +29,7 @@ The use of the C++11 \cpp{thread} is thus considered harmful and we will present
 
 C++20 adds a new class \cpp{jthread} (``joining threads''), which does not require a call to \cpp{join} or \cpp{detach}. Instead, the destructor waits for completion of the code (``joins'') automatically. 
 
-This is an example of the ``resource acquisition is initialization'' idiom, which is generally one of the best practices in C++. In RAII, the resource allocation is tied to an object's lifetime and is hence a class invariant. In a constructor, one allocates the resources. In a destructor, one releases the resources. There is no risk of a resource leak. 
+This is an example of the ``resource acquisition is initialization'' (RAII) idiom, which is generally one of the best practices in C++. In RAII, the resource allocation is tied to an object's lifetime and is hence a class invariant. When a resource is acquired, it is allocated in the constructor, and when the object is destroyed, the resource is automatically released in the destructor. There is no risk of a resource leak. 
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/eWrfrsd7K}{\ExternalLink}}
@@ -38,7 +38,9 @@ This is an example of the ``resource acquisition is initialization'' idiom, whic
 \cppfile{code_examples/cpp23/jthread1.cpp}
 \end{codebox}
 
-Notice that the above example would very like result in abnormal program termination, if we changed jthread to thread. (Why?) When we use standard output, it is prudent to wrap it in a syncstream: 
+Notice that the above example would likely result in abnormal program termination if we changed jthread to std::thread. The reason for this is that with thread, we would still need to manually call `join` or `detach` to ensure proper thread management. If we forget to do so before the `std::thread` object goes out of scope, the program could terminate abnormally.
+
+Additionally, when using standard output, it is recommended to wrap it in a `syncstream`. A `syncstream` ensures thread-safe access to the standard output, preventing data races and ensuring correct output when multiple threads are involved.
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/rr1GrWqfP}{\ExternalLink}}
@@ -65,6 +67,7 @@ Passing arguments to threads is, nevertheless, very useful. Notably, when we pas
 \cppfile{code_examples/cpp23/jthread4.cpp}
 \end{codebox}
 
+%/ This section is not really clear, honestly, but I don't know, how to fix it
 More complicated procedures for the stopping of the thread possible. One can define \cpp{std::stop_callback} object inside the thread, whose constructor takes the stop token (\cpp{std::stop_token}) and a function. The function (in the example below another lambda) gets executed, when the thread is requested to stop via the \cpp{std::stop_token}:
 
 \raggedbottom
@@ -88,7 +91,7 @@ More complicated procedures for the stopping of the thread possible. One can def
 
 \subsection{Coroutines}
 
-In C++23 and subsequent versions, we hope to see some standard syntax for defining coroutines (cf. P2502), such as:
+In C++23 and subsequent versions, we hope to see some standard syntax for defining coroutines (cf. P2502) (Coroutines provide a way to pause the execution of a function, return control to the calling code, and later resume from where it left off, without blocking the entire program), such as:
 
 \raggedbottom
 \begin{codebox}[]{}
@@ -154,7 +157,7 @@ Sometimes, we also store the promise type in a \cpp{promise_type} type member, a
 
 \subsubsection{Awaiters}
 
-Finally, let us consider awaiters, which can be called when a coroutine is suspended or resumed. 
+Finally, let us consider awaiters, which can be called when a coroutine is suspended or resumed. It provides the necessary machinery to wait for an asynchronous operation to complete and resume the coroutine when the result is available.
 Key methods of an awaiter include:
 \begin{itemize}
 \item \cpp{await_ready()} is called immediately before suspension of a coroutine. If it returns \cpp{true}, the coroutine will not be suspended. 
@@ -221,7 +224,7 @@ For the technical specification, see \url{https://github.com/GorNishanov/corouti
 \subsection{Atomic Variables}
 \label{sec:atomiccpp23}
 
-Since C++11, there is an excellent support for atomic variables in header \cpp{<atomic>}. 
+Since C++11, there is an excellent support for atomic variables (hey ensure that operations performed on the variable are executed atomically, meaning they are indivisible and cannot be interrupted by other threads) in header \cpp{<atomic>}. 
 The primary template can be instantiated with types that are TriviallyCopyable, CopyConstructible, and CopyAssignable.
 First, let us consider two simple examples:
 
@@ -284,7 +287,7 @@ A slightly more verbose example considers:
 
 \subsection{Barrier}
 
-Since C++20, there is support for barriers in header \cpp{<barrier>}. The constructor takes an integer value, which is the number of threads that the barrier is expected to block. The key methods are \cpp{arrive_and_wait()} and \cpp{arrive_and_drop()}. The former functions as one would expect. The latter decrements the initial expected count for all uses by one, as if one thread could never reach the barrier subsequently. This can be very useful in error management:
+Since C++20, there is support for barriers in header \cpp{<barrier>}. They allow threads to synchronize and coordinate their progress by providing a designated point in the code where all participating threads must reach before any of them can proceed further. When a thread reaches a barrier, it will be blocked until all other threads in the same synchronization group also reach the barrier. Once all threads have arrived, the barrier is released, and all threads are allowed to continue executing. The constructor takes an integer value, which is the number of threads that the barrier is expected to block. The key methods are \cpp{arrive_and_wait()} and \cpp{arrive_and_drop()}. The former functions as one would expect. The latter decrements the initial expected count for all uses by one, as if one thread could never reach the barrier subsequently. This can be very useful in error management:
 
 \raggedbottom
 \begin{codebox}[]{\href{https://godbolt.org/z/fT17E5P4x}{\ExternalLink}}
