@@ -91,11 +91,11 @@ More complicated procedures for the stopping of the thread possible. One can def
 
 \subsection{Coroutines}
 
-In C++23 and subsequent versions, we hope to see some standard syntax for defining coroutines (cf. P2502) (Coroutines provide a way to pause the execution of a function, return control to the calling code, and later resume from where it left off, without blocking the entire program), such as:
+In C++23 and subsequent versions, we can define coroutines, which provide a way to pause the execution of a function, return control to the calling code, and later resume from where it left off, without blocking the entire program. To get a preview, consider class template std::generator in header generator presents a view of the elements yielded by the evaluation of a coroutine:
 
 \raggedbottom
 \begin{codebox}[]{}
-\footnotesize An example of the use of coroutines, which currently does not compile in GCC 12.2.
+\footnotesize An example of the use of coroutines, which currently does not compile in trunk of gcc or clang or MSVC 19.
 \tcblower
 \cppfile{code_examples/cpp23/coroutines1.cpp}
 \end{codebox}

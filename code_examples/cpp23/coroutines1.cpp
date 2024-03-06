@@ -11,6 +11,6 @@ std::generator<int> work() {
 
 int main() {
   for (int i : work()) {
-    std::osyncstream(std::cout) << ch << '\n';
+    std::osyncstream(std::cout) << i << '\n';
   }
 }
