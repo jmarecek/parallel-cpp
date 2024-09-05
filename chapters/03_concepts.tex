@@ -1,11 +1,11 @@
 \chapter{The Concepts}
 \label{ch:concepts}
 
-Parallelism means two or more tasks can be executed simultaneously. This is an option, which the compiler and operating system and processor can exercise, but does not come with any guarantees. 
+Parallelism means two or more tasks can be executed simultaneously. This is an option, which the compiler, operating system and processor can exercise, but does not come with any guarantees. 
 Often, this means no shared variables or other resources, and need not require any synchronization primitives.
 
 Concurrency means that two or more tasks start, run, and complete in overlapping time periods, while sharing some resources. 
-If two tasks concurrently set shared variable x to 1 and 2, it is not clear what value it would have, subsequently.
+If two tasks concurrently set a shared variable x to 1 and 2, it is not clear what value it would have, subsequently.
 More broadly, concurrent access to a mutable shared memory can result in issues without the use of synchronization 
 primitives (``data race'') and with the use of synchronization primitives (``deadlock'').
 
@@ -35,7 +35,7 @@ Either Bob or the bank could be \$100 short.
 
 \subsection{Deadlock}
 
-When we need to ensure mutual exclusion in access to two or more shared variables, 
+When we need to ensure mutual exclusion for access to two or more shared variables, 
 e.g., two temporary results associated with two mutexes, 
 one may naively lock the first mutex first, and subsequently lock the other mutex. This, however, 
 can lead to a deadlock. One needs to lock both mutexes at the same time.  
@@ -63,7 +63,7 @@ There are two essential models for concurrent programming: shared memory and mes
 \begin{itemize}
 \item Confinement: Do not share memory between threads. This is often impossible.
 \item Immutability: Do not share any mutable data between threads. 
-\item Thread-safe code: Use data types with additional guarantees for storing any mutable data shared between threads, or even better, use implementations of algorithms that are already parallelized and handle the concurrency issues for you. For example in C++, one can use the standard template library with a suitable execution policy. In particular, the header \cpp{execution} defines objects \cpp{std::execution::seq}, \cpp{std::execution::par}, \cpp{std::execution::par_unseq}, which can be passed as the first argument of any standard algorithm, e.g., \\
+\item Thread-safe code: Use data types with additional guarantees for storing any mutable data shared between threads, or even better, use implementations of algorithms that are already parallelized and handle the concurrency issues for you. For example in C++, one can use the standard template library (STL) with a suitable execution policy. In particular, the header \cpp{execution} defines objects \cpp{std::execution::seq}, \cpp{std::execution::par}, \cpp{std::execution::par_unseq}, which can be passed as the first argument of any standard algorithm, e.g., \\
 \cpp{std::vector<int> my_data; std::sort(std::execution::par,my_data.begin(),my_data.end());}\\
 See Section \ref{sec:foreachcpp23} for more examples.
 \item Synchronization: Use synchronization primitives to prevent accessing the variable at the same time. This option is explored in this chapter in more detail. 
@@ -76,18 +76,17 @@ Processes, threads, tasks, and coroutines execute instructions.
 
 A \emph{process} provides all of the prerequisites for executing instructions: loads an executable program, sets up a virtual address space, the environment (e.g. environment variables and a security context), the process control block (PCB, often stored in registers of the processor and on a per-process stack in kernel memory), opens handles to system objects (e.g., files, sockets), and often much more. In some sense, one can imagine ``a virtual machine''.
 
-Within a particular process, there is at least one \emph{thread}. All threads of a particular process share the same virtual address space and handles to system objects. Each thread, independently, operates its own context (registers, stack, exception handlers). Unless declared otherwise, threads of a particular process share memory and are allocated ``time slices'' by the operating system. This can be seen as a ``virtual processor'' within a ``a virtual machine'' of a process, often with no guarantees on the time slicing.
+Within a particular process, there is at least one \emph{thread}. All threads of a particular process share the same virtual address space and handles to system objects. Each thread, independently, operates its own context (registers, stack, exception handlers). Unless declared otherwise, threads of a particular process share memory and are allocated ``time slices'' by the operating system. This can be seen as a ``virtual processor'' within a ``virtual machine'' of a process, often with no guarantees on the time slicing.
 
-All modern operating systems (OS) are multitasking, i.e., running multiple processes with the operating system forcibly interrupting the run one one process to execute another process after a certain amount of time (``preemptive scheduling''). Switching between the processes involves swapping the process control block (PCB). In Intel architectures, this is known as the task state segment (TSS), and there is hardware support for the switch. AMD64 does not support task switches in hardware.
+All modern operating systems (OS) are multitasking, i.e., running multiple processes with the operating system forcibly interrupting the run one process to execute another process after a certain amount of time (``preemptive scheduling''). Switching between the processes involves swapping the process control block (PCB). In Intel architectures, this is known as the task state segment (TSS), and there is hardware support for the switch. AMD64 does not support task switches in hardware.
 Consequently, neither Windows nor Linux kernels utilize the hardware support for the switch.
 Context switching thus has non-trivial impact on performance. 
 
-Most modern processors are multi-core and support multithreading in some form. This means that one 
-each process can execute multiple ``hardware threads'' and there is some support for switching between those. In Intel architectures, hyper-threading means each hardware core can execute multiple threads, e.g., two, to take advantage of idle time (e.g., loading data, network communications).  
+Most modern processors are multi-core and support multithreading in some form. This means that single process can execute multiple ``hardware threads'', with support for switching between those. In Intel architectures, hyper-threading means each hardware core can execute multiple threads, e.g., two, to take advantage of idle time (e.g., loading data, network communications).  
 
 Most modern operating systems \emph{do not guarantee} fairness among the threads. 
 
-Within a particular thread, one may utilize multiple \emph{coroutines}, which can be seen as subroutines that can run in multiple steps, but sometimes can serve as a light-weight alternative to hardware threads. Coroutines can be called, can return when completed, but also can suspend themselves, yielding control and partial results, and be resumed by another co-routine. Typical uses involve generators andfactories and various other concepts within ``lazy evaluation'', as well as event-driven architectures within cooperative multi-tasking. 
+Within a particular thread, one may utilize multiple \emph{coroutines}, which can be seen as subroutines that can run in multiple steps, but sometimes can serve as a light-weight alternative to hardware threads. Coroutines can be called, can return when completed, but also can suspend themselves, yielding control and partial results, and be resumed by another co-routine. Typical uses involve generators andfactories and various other concepts within ``lazy evaluation'', as well as event-driven architectures within cooperative multitasking. 
 
 That is: two coroutines within one thread never run in parallel, but one can have the runs of two or more coroutines interleaved. We can suspend a co-routine in one thread and resume it within another thread. 
 
@@ -101,20 +100,20 @@ A \emph{task} is a rather abstract unit of work, e.g., a function, which can be 
 A large part of theoretical computer science is devoted to the study of the limitations of parallelizability of algorithms, starting with the very clear question: does every problem 
 with a polynomial-time sequential algorithm also have an efficient parallel algorithm? In short, the answer is no. 
 
-Let us consider the P-Complete problems \cite{greenlaw1995limits}, i.e.,  decision problems that are in P and where every problem in P can be reduced to the P-Complete problem in logarithmic space (L). The prime examples of  P-Complete problems are 
+Let us consider the P-Complete problems \cite{greenlaw1995limits}, i.e.,  decision problems that are in P and where every problem in P can be reduced to the P-Complete problem in logarithmic space (L). The prime examples of P-Complete problems are 
 \begin{itemize} 
 \item circuit evaluation: given a Boolean circuit and an input, decide what the circuit outputs
 \item linear programming: given a linear function subject to linear inequality constraints, find the optimum of the linear function
 \item many graph problems, such as Lexicographically First Depth-first Search Ordering (LFDFS):
-given an undirected graph with fixed ordered adjacency lists, and two designated vertices $u$ and $v$, is vertex $u$ visited before vertex $v$ in the depth-first search of the graph?
+given an undirected graph with fixed ordered adjacency lists and two designated vertices $u$ and $v$, is vertex $u$ visited before vertex $v$ in the depth-first search of the graph?
 \item many compression algorithms: given strings $s$ and $t$, will compressing $s$ with LZ78 add $t$ to the dictionary?
 \item many problems related to Markov decision processes: is the minimum expected cost over all policies equal to 0 (for both finite, and long-run versions). 
-\item many tests of local optimality in combinatorial optimization: in an instance of Traveling Salesman, and a sequence of tours, is this a 2-Opt sequence? 
+\item many tests of local optimality in combinatorial optimization: in an instance of Traveling Salesman and a sequence of tours, is this a 2-Opt sequence? 
 \end{itemize} 
 Therein, we cannot hope for efficient solution on a parallel computer in the sense of solving in time $O(log^c n)$ using $O(n^k)$ parallel processors for some constants $c$ and $k$. 
 
 \label{sec:Nicks}
-In contrast, Nick's class NC$^{c}$ are decision problems solvable by a uniform family of Boolean circuits with polynomial size, depth $O(log^c(n))$, and fan-in 2. More usefully, a problem in NC with input of length $n$ can be solved in time $O(log^c n)$ using $O(n^k)$ parallel processors for some  constants $c$ and $k$. (Notice that for a constant $k$, $O(n^k)$ is a polynomial.) Thus, NC can be thought of as problems that can be efficiently solved on a parallel computer. Integer arithmetics (addition, multiplication and division), matrix arithmetics (multiplication, determinant, inverse, rank), or multiple graph problems (shortest path, maximal matching with some restrictions on the weights) are in Nick's class and hence ``easier'' than P-Complete problems. 
+In contrast, Nick's class NC$^{c}$ are decision problems solvable by a uniform family of Boolean circuits with polynomial size, depth $O(log^c(n))$, and fan-in 2. More usefully, a problem in NC with input of length $n$ can be solved in time $O(log^c n)$ using $O(n^k)$ parallel processors for some constants $c$ and $k$. (Notice that for a constant $k$, $O(n^k)$ is a polynomial.) Thus, NC can be thought of as problems that can be efficiently solved on a parallel computer. Integer arithmetics (addition, multiplication and division), matrix arithmetics (multiplication, determinant, inverse, rank), or multiple graph problems (shortest path, maximal matching with some restrictions on the weights) are in Nick's class and hence ``easier'' than P-Complete problems. 
 
 \section{Hardware support}
 
@@ -136,14 +135,14 @@ As we have mentioned in the introduction, the bulk of the computational performa
 \item Within each SM, there are 128 cores working with single-precision floating-point (FP32) precision and two double-precision (FP64) units. There is also 128 KB of L1/Shared Memory, shared across the 128 cores. 
 \item Each SM is partitioned into four processing blocks (or partitions), each with a few kilobytes of L0 instruction cache and one warp scheduler.
 \end{itemize}
-Altogether, A100 has $7 \cdot 12 \cdot 128 = 10752$ cores, but their use is rather constrained. Each warp can have at most 32 threads and runs them in lock-step on one processing blocks. Each streaming multiprocessors can run at most 64 warps of 32 threadblocks (i.e., 2048 threads per SM). Further constraints are due to the register use: each thread can use at most 255 registers, but there are only 65536 32-bit registers for the SM (yielding a limit of 257 threads per SM, at full register utilization). Further constraints are due to the use of memory hierarchy (esp. the 128 KB of shared memory, shared across the 128 cores). 
+Altogether, A100 has $7 \cdot 12 \cdot 128 = 10752$ cores, but their usage is rather constrained. Each warp can have at most 32 threads and runs them in lock-step on one processing blocks. Each streaming multiprocessors can run at most 64 warps of 32 threadblocks (i.e., 2048 threads per SM). Further constraints are due to the register use: each thread can use at most 255 registers, but there are only 65536 32-bit registers for the SM (yielding a limit of 257 threads per SM, at full register utilization). Further constraints are due to the use of memory hierarchy (esp. the 128 KB of shared memory, shared across the 128 cores). 
 
 %The code is translated from CUDA C or C++ to Parallel Thread Execution (PTX), an intermediate representation, and subsequently to a proprietary assembly language (SASS). 
 
 Similar to the CPU, the GPU hence has a memory hierarchy:
 \begin{itemize}
 \item L1 cache with 33 cycle latency and shared memory with even lower latency, based on microbenchmarking \cite{9926299} 
-\item L2 cache with up to 2080	 GB/s read bandwidth (200 cycle latency), based on microbenchmarking \cite{9926299} 
+\item L2 cache with up to 2080 GB/s read bandwidth (200 cycle latency), based on microbenchmarking \cite{9926299} 
 \item on-board HBM2 memory with 1555 GB/sec bandwidth (290 cycle latency)
 \item intra-board NVLink with 50 Gb/sec per signal pair bandwidth
 \item access to RAM via PCI Express Gen 4 (PCIe Gen 4) at 31.5 GB/sec
@@ -189,7 +188,7 @@ In C++, the \cpp{atomic} header defines two variants of ``compare and swap'' and
 
 The former is called with the desired value \cpp{i}, the new value {i}, and the memory order to consider if there is a match and if there is no match. Typically, if there is a match and we want to replace the value, we may use \cpp{std::memory_order_release}. If there is no match, we are just reading the value and \cpp{std::memory_order_acquire} would suffice. In the latter variant, we pass two pointers. 
 
-The difference between the ``weak'' and ``strong'' variant is in that the weak variant may return false even if there is a match, in certain cases, but can be much faster in certain architectures. This notably entails ARM architectures (RISC-V and MIPS), where the weak variant will be implemented using the so called load-link/store-conditional pair of instructions (load exclusive register / ldxr and store exclusive register / stxr in ARM version 8).
+The difference between the ``weak'' and ``strong'' variant is in that the weak variant may return false even if there is a match, in certain cases, but can be much faster on some architectures. This notably entails ARM architectures (RISC-V and MIPS), where the weak variant will be implemented using the so called load-link/store-conditional pair of instructions (load exclusive register / ldxr and store exclusive register / stxr in ARM version 8).
 These are much faster than the comparable instructions issuing a barrier (ldaxr/stlxr in ARM version 8).
 All four ARM instructions utilize only two registers, compared to three registers for CAS proper in Intel architectures (Compare and exchange / cmpxchg since 80486 and cmpxchg8b and cmpxchg16b since Intel Core 2). On recent Intel and AMD processors, cmpxchg is only marginally slower than a non-cached load.
 
